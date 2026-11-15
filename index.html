@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#202c33">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Recorrido de obra</title>
+<style>
+:root{
+  --bg:#0b141a; --panel:#111b21; --head:#202c33; --out:#005c4b; --ink:#e9edef; --muted:#8696a0;
+  --accent:#00a884; --line:#222d34; --pend:#f0913a; --listo:#25d366; --sin:#53bdeb; --danger:#f15c6d;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.35 system-ui,Roboto,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea{font:inherit;color:var(--ink)}
+[hidden]{display:none!important}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.pantalla{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.top{background:var(--head);display:flex;align-items:center;gap:6px;padding:8px 6px 8px 14px;padding-top:calc(8px + env(safe-area-inset-top));min-height:58px;flex:none}
+.top h1{font-size:20px;font-weight:600;flex:1;margin:0}
+.ib{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--ink);flex:none}
+.ib:active{background:#ffffff1a}
+.tabs{display:flex;background:var(--head);flex:none}
+.tabs button{flex:1;padding:12px 0 9px;color:var(--muted);font-weight:600;font-size:14px;border-bottom:3px solid transparent;text-transform:uppercase;letter-spacing:.02em}
+.tabs button.on{color:var(--accent);border-color:var(--accent)}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* Candado */
+#candado{align-items:center;justify-content:center;padding:24px;text-align:center;gap:14px}
+#candado .logo{width:84px;height:84px;border-radius:24px;background:var(--accent);display:grid;place-items:center;color:#0b141a}
+#candado .logo svg{width:46px;height:46px}
+#candado p{color:var(--muted);max-width:320px;margin:0}
+#candado input{width:100%;max-width:320px;background:var(--head);border:1px solid var(--line);border-radius:24px;padding:13px 18px;outline:none;text-align:center}
+.boton{background:var(--accent);color:#0b141a;font-weight:700;border-radius:24px;padding:12px 26px}
+.boton.gris{background:var(--head);color:var(--ink)}
+
+/* Plano */
+#planoWrap{margin:10px;border-radius:12px;overflow-x:auto;overflow-y:hidden;background:#1c1c1c;scrollbar-width:thin}
+.lienzo{position:relative}
+.lienzo img{width:100%;display:block;filter:invert(.89) hue-rotate(180deg);user-select:none;-webkit-user-drag:none}
+#planoWrap svg{position:absolute;inset:0;width:100%;height:100%}
+.area rect{stroke-width:5}
+.area.sin rect{fill:rgba(83,189,235,.05);stroke:rgba(83,189,235,.55);stroke-dasharray:16 10}
+.area.tocada rect{fill:rgba(83,189,235,.2);stroke:var(--sin)}
+.area.pend rect{fill:rgba(240,145,58,.28);stroke:var(--pend)}
+.area.listo rect{fill:rgba(37,211,102,.25);stroke:var(--listo)}
+.area:active rect{fill:rgba(0,168,132,.45)}
+.area text{pointer-events:none;font-weight:800;fill:#fff;paint-order:stroke;stroke:#000;stroke-width:8px}
+.pista{font-size:12px;color:var(--muted);padding:0 14px 4px}
+.leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 14px 6px}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+
+/* Lista estilo chats */
+.fila{display:flex;align-items:center;gap:13px;padding:0 14px;width:100%;text-align:left}
+.fila:active{background:#ffffff0d}
+.av{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;font-size:16px;background:#2a3942}
+.av.tocada{background:#1d6d8c}.av.pend{background:var(--pend)}.av.listo{background:#1fa855}
+.fila .txt{flex:1;min-width:0;border-bottom:1px solid var(--line);padding:13px 0}
+.fila .l1,.fila .l2{display:flex;align-items:center;gap:8px}
+.fila .nom{flex:1;font-weight:500;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fila .hr{font-size:12px;color:var(--muted)}
+.fila .prev{flex:1;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.fila .prev svg{width:16px;height:16px}
+.badge{background:var(--accent);color:#0b141a;border-radius:12px;min-width:21px;height:21px;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px}
+.seccion{color:var(--muted);font-size:13px;padding:14px 14px 4px;font-weight:600}
+
+/* Chat */
+#chat .top{gap:4px;padding-left:4px}
+#chat .av{width:40px;height:40px;font-size:14px}
+.titulo{flex:1;min-width:0;margin-left:6px}
+.titulo b{display:block;font-weight:500;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titulo small{color:var(--muted);font-size:13px}
+#estados{display:flex;gap:8px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line);flex:none}
+#estados button{flex:1;border:1px solid var(--line);border-radius:18px;padding:6px 4px;font-size:13px;color:var(--muted)}
+#estados button.on[data-e=sin]{background:#1d6d8c;color:#fff;border-color:#1d6d8c}
+#estados button.on[data-e=pend]{background:var(--pend);color:#111;border-color:var(--pend)}
+#estados button.on[data-e=listo]{background:#1fa855;color:#fff;border-color:#1fa855}
+#mensajes{flex:1;overflow-y:auto;padding:6px 10px 10px;display:flex;flex-direction:column;
+  background-color:var(--bg);background-image:radial-gradient(#ffffff08 1px,transparent 1px);background-size:22px 22px}
+.dia{align-self:center;background:#182229;color:var(--muted);font-size:12.5px;padding:5px 12px;border-radius:8px;margin:10px 0 6px;text-transform:uppercase}
+.vacioChat{align-self:center;background:#182229;color:#ffd279;font-size:13px;padding:8px 12px;border-radius:8px;margin:14px 10px;text-align:center;max-width:320px}
+.b{max-width:82%;align-self:flex-end;background:var(--out);border-radius:8px 0 8px 8px;padding:6px 8px 5px 9px;margin:3px 0;position:relative;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.b.cont{border-radius:8px;margin-top:1px}
+.b .t{white-space:pre-wrap;word-wrap:break-word}
+.hora{float:right;font-size:11px;color:#ffffff99;margin:7px 0 -5px 10px;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.hora svg{width:16px;height:16px;stroke-width:2.2}
+.hora .ok{color:#53bdeb}
+.b.media{padding:3px}
+.b.media .img{display:block;width:min(260px,68vw);min-height:120px;max-height:360px;object-fit:cover;border-radius:6px;background:#0d3a33}
+.b.media .hora{position:absolute;right:9px;bottom:7px;margin:0;color:#fff;text-shadow:0 0 4px #000}
+.b.media .play{position:absolute;inset:0;display:grid;place-items:center}
+.b.media .play span{width:54px;height:54px;border-radius:50%;background:#0009;display:grid;place-items:center}
+.b.media .play svg{fill:#fff;stroke:none;width:26px;height:26px;margin-left:3px}
+.b.sel{filter:brightness(1.35)}
+.aud{display:flex;align-items:center;gap:10px;width:min(250px,64vw);padding:2px 0}
+.aud .pb{width:36px;height:36px;display:grid;place-items:center;flex:none}
+.aud .pb svg{fill:var(--ink);stroke:none;width:26px;height:26px}
+.aud .barra{flex:1;height:4px;border-radius:2px;background:#ffffff40;position:relative}
+.aud .barra i{position:absolute;left:0;top:0;bottom:0;background:#53bdeb;border-radius:2px;width:0}
+.aud .barra b{position:absolute;top:-5px;width:13px;height:13px;border-radius:50%;background:#53bdeb;left:-6px}
+.aud .mic{width:40px;height:40px;border-radius:50%;background:#2a3942;display:grid;place-items:center;flex:none;color:#53bdeb}
+.aud .mic svg{width:20px;height:20px}
+.aud-pie{display:flex;justify-content:space-between;font-size:11px;color:#ffffff99;margin:2px 0 0 46px}
+
+/* Composer */
+#composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex:none}
+.caja{flex:1;display:flex;align-items:flex-end;background:var(--head);border-radius:25px;min-height:50px;padding:0 4px 0 16px}
+.caja textarea{flex:1;background:none;border:0;resize:none;max-height:130px;padding:13px 0;outline:none;line-height:1.35;height:48px}
+.caja .ib{color:var(--muted);height:48px;width:44px}
+.redondo{width:50px;height:50px;border-radius:50%;background:var(--accent);color:#0b141a;display:grid;place-items:center;flex:none}
+.redondo:active{filter:brightness(1.15)}
+#grabando{flex:1;display:flex;align-items:center;gap:12px;background:var(--head);border-radius:25px;min-height:50px;padding:0 8px 0 6px}
+#grabando .punto{width:11px;height:11px;border-radius:50%;background:var(--danger);animation:late 1s infinite}
+#grabando .tiempo{font-variant-numeric:tabular-nums;font-size:17px}
+#grabando .msg{flex:1;color:var(--muted);font-size:14px}
+#grabando .ib{color:var(--danger)}
+@keyframes late{50%{opacity:.2}}
+
+/* Hoja inferior, visor, toast */
+#fondo{position:fixed;inset:0;background:#0008;z-index:34}
+#hoja{position:fixed;left:0;right:0;bottom:0;background:var(--head);border-radius:18px 18px 0 0;z-index:35;padding:8px 0 calc(12px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;animation:sube .18s ease-out}
+@keyframes sube{from{transform:translateY(40px);opacity:.4}}
+#hoja .tira{width:36px;height:4px;border-radius:2px;background:#ffffff33;margin:4px auto 10px}
+#hoja h3{margin:4px 20px 10px;font-size:16px}
+#hoja p{margin:0 20px 12px;color:var(--muted);font-size:14px}
+.op{display:flex;align-items:center;gap:18px;width:100%;padding:14px 22px;text-align:left;font-size:16px}
+.op:active{background:#ffffff0d}
+.op svg{color:var(--muted)}
+.op.rojo,.op.rojo svg{color:var(--danger)}
+.op small{display:block;color:var(--muted);font-size:13px}
+.gridOps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 14px 10px}
+.gridOps button{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:8px 0}
+.gridOps span{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff}
+#visor{position:fixed;inset:0;background:#000;z-index:30;display:flex;flex-direction:column}
+#visor .top{background:#000a}
+#visor .medio{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#visor img,#visor video{max-width:100%;max-height:100%}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#e9edef;color:#111b21;padding:10px 16px;border-radius:22px;font-size:14px;z-index:40;max-width:90vw;text-align:center;box-shadow:0 4px 18px #0006}
+</style>
+</head>
+<body>
+
+<!-- Candado: los planos vienen cifrados -->
+<section id="candado" class="pantalla">
+  <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+  <h2 style="margin:0">Recorrido de obra</h2>
+  <p>Escribe la clave para abrir los planos. Solo se pide la primera vez en este teléfono.</p>
+  <input id="clave" type="password" placeholder="Clave" autocomplete="current-password">
+  <button id="btnAbrir" class="boton">Abrir</button>
+  <p id="errClave" style="color:var(--danger)"></p>
+</section>
+
+<!-- Inicio: plano + lista de áreas -->
+<section id="inicio" class="pantalla" hidden>
+  <header class="top"><h1 id="titulo">Recorrido</h1>
+    <button class="ib" id="btnMenu" aria-label="Menú"></button></header>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="scroll" id="scrollInicio">
+    <div id="planoWrap"></div>
+    <div class="leyenda" id="leyenda"></div>
+    <div id="lista"></div>
+  </div>
+</section>
+
+<!-- Chat de un área -->
+<section id="chat" class="pantalla" hidden>
+  <header class="top">
+    <button class="ib" id="btnAtras" aria-label="Atrás"></button>
+    <div class="av" id="chatAv"></div>
+    <div class="titulo"><b id="chatNombre"></b><small id="chatSub"></small></div>
+    <button class="ib" id="btnChatMenu" aria-label="Opciones"></button>
+  </header>
+  <div id="estados"></div>
+  <div id="mensajes"></div>
+  <footer id="composer">
+    <div class="caja" id="caja">
+      <textarea id="texto" rows="1" placeholder="Mensaje"></textarea>
+      <button class="ib" id="btnClip" aria-label="Adjuntar"></button>
+      <button class="ib" id="btnCam" aria-label="Cámara"></button>
+    </div>
+    <div id="grabando" hidden>
+      <button class="ib" id="btnDescartar" aria-label="Descartar"></button>
+      <span class="punto"></span><span class="tiempo" id="recTiempo">0:00</span>
+      <span class="msg">Grabando…</span>
+    </div>
+    <button class="redondo" id="btnAccion" aria-label="Grabar audio"></button>
+  </footer>
+</section>
+
+<div id="fondo" hidden></div>
+<div id="hoja" hidden></div>
+<div id="visor" hidden>
+  <header class="top"><button class="ib" id="vAtras"></button>
+    <div class="titulo"><b id="vTitulo"></b><small id="vSub"></small></div>
+    <button class="ib" id="vMover"></button><button class="ib" id="vBorrar"></button></header>
+  <div class="medio" id="vMedio"></div>
+</div>
+<div id="toast" hidden></div>
+
+<input type="file" id="inCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="inGal" accept="image/*,video/*" multiple hidden>
+<input type="file" id="inAud" accept="audio/*" multiple hidden>
+
+<script>
+'use strict';
+// ---------- Iconos ----------
+const IC = {
+  mas:'<circle cx="12" cy="5" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="12" cy="19" r="1.2"/>',
+  atras:'<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
+  clip:'<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
+  cam:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+  mic:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+  enviar:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
+  basura:'<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/>',
+  imagen:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+  video:'<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+  audio:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  doble:'<polyline points="18 6 7 17 2 12"/><polyline points="22 6 11 17 10 16"/>',
+  mover:'<polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  subir:'<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>',
+  bajar:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  disco:'<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+  candado:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  play:'<polygon points="6 3 20 12 6 21 6 3"/>',
+  pausa:'<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>',
+};
+const ic = (n, extra='') => `<svg class="i" viewBox="0 0 24 24" ${extra}>${IC[n]}</svg>`;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- Base de datos del teléfono (IndexedDB) ----------
+let DB;
+const req = r => new Promise((ok, mal) => { r.onsuccess = () => ok(r.result); r.onerror = () => mal(r.error); });
+function abrirDB(){
+  return new Promise((ok, mal) => {
+    const r = indexedDB.open('recorrido-obra', 1);
+    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('msgs', {keyPath:'id'}).createIndex('area','area'); d.createObjectStore('kv'); };
+    r.onsuccess = () => ok(DB = r.result); r.onerror = () => mal(r.error);
+  });
+}
+const st = (s, m='readonly') => DB.transaction(s, m).objectStore(s);
+const kvGet = k => req(st('kv').get(k));
+const kvSet = (k, v) => req(st('kv','readwrite').put(v, k));
+const msgPut = m => req(st('msgs','readwrite').put(m));
+const msgDel = id => req(st('msgs','readwrite').delete(id));
+const msgsDe = a => req(st('msgs').index('area').getAll(a));
+const msgsTodos = () => req(st('msgs').getAll());
+
+// ---------- Estado de la app ----------
+let P = null;               // datos descifrados: planos, áreas
+const AREAS = {};           // id -> {id,nivel,nombre,carpeta,ini}
+let ESTADOS = {};           // id -> 'sin'|'pend'|'listo'
+let RES = {};               // id -> {n, nuevos, ultimo}
+let tab = 'pb', abierta = null, urls = [];
+
+function toast(t, ms=2600){ const e=$('#toast'); e.textContent=t; e.hidden=false; clearTimeout(toast.t); if(ms) toast.t=setTimeout(()=>e.hidden=true, ms); }
+const NIVELES = {pb:'Planta baja', n1:'Nivel 1', n2:'Nivel 2', gen:'Generales'};
+const iniciales = n => { const p = n.replace(/[^\p{L}\p{N} ]/gu,'').split(/\s+/).filter(Boolean); return ((p[0]||'')[0] + ((p[1]||'')[0]||'')).toUpperCase(); };
+const hora = d => new Date(d).toLocaleTimeString('es-VE', {hour:'numeric', minute:'2-digit'});
+function diaTxt(d){
+  const f = new Date(d), h = new Date(); const s = x => x.toDateString();
+  if (s(f)===s(h)) return 'Hoy';
+  const a = new Date(h); a.setDate(h.getDate()-1); if (s(f)===s(a)) return 'Ayer';
+  return f.toLocaleDateString('es-VE', {weekday:'long', day:'numeric', month:'long'});
+}
+function cuandoCorto(d){ const f=new Date(d), h=new Date(); return f.toDateString()===h.toDateString() ? hora(d) : f.toLocaleDateString('es-VE',{day:'2-digit',month:'2-digit'}); }
+const mmss = s => { s = Math.max(0, Math.round(s||0)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+const claseDe = id => { const e = ESTADOS[id]||'sin'; if (e!=='sin') return e; return (RES[id]&&RES[id].n) ? 'tocada' : 'sin'; };
+
+function prepararAreas(){
+  for (const [k,p] of Object.entries(P.planos)) for (const a of p.areas)
+    AREAS[k+'-'+a[0]] = {id:k+'-'+a[0], nivel:k, nombre:a[1], carpeta:p.cod+' '+a[1], rect:a.slice(2)};
+  for (const g of P.generales)
+    AREAS['gen-'+g[0]] = {id:'gen-'+g[0], nivel:'gen', nombre:g[1], carpeta:'GEN '+g[1].replace(/[\/\\:*?"<>|]/g,'-')};
+}
+
+async function recalcular(){
+  RES = {}; for (const id in AREAS) RES[id] = {n:0, nuevos:0, ultimo:null};
+  for (const m of await msgsTodos()){
+    const r = RES[m.area]; if (!r) continue;
+    r.n++; if (!m.exportado) r.nuevos++;
+    if (!r.ultimo || m.fecha > r.ultimo.fecha) r.ultimo = {tipo:m.tipo, texto:m.texto, dur:m.dur, fecha:m.fecha};
+  }
+}
+
+// ---------- Candado y descifrado ----------
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function descifrar(clave){
+  const enc = await (await fetch('planos.enc', {cache:'no-cache'})).json();
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(clave), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey({name:'PBKDF2', salt:b64(enc.salt), iterations:enc.iter, hash:'SHA-256'}, base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(enc.iv)}, key, b64(enc.data));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+$('#btnAbrir').onclick = async () => {
+  const c = $('#clave').value.trim(); if (!c) return;
+  $('#btnAbrir').textContent = 'Abriendo…';
+  try { P = await descifrar(c); await kvSet('payload', P); await arrancar(); }
+  catch(e){ $('#errClave').textContent = e.name==='OperationError' ? 'Clave incorrecta.' : 'No pude abrir: ' + e.message; }
+  $('#btnAbrir').textContent = 'Abrir';
+};
+$('#clave').onkeydown = e => { if (e.key==='Enter') $('#btnAbrir').click(); };
+
+async function arrancar(){
+  prepararAreas();
+  ESTADOS = (await kvGet('estados')) || {};
+  await recalcular();
+  $('#titulo').textContent = 'Recorrido ' + (P.titulo||'');
+  document.title = 'Recorrido ' + (P.titulo||'');
+  $('#candado').hidden = true; $('#inicio').hidden = false;
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch(e){}
+  pintarInicio();
+}
+
+// ---------- Inicio ----------
+function pintarTabs(){
+  $('#tabs').innerHTML = ['pb','n1','n2','gen'].map(k => `<button data-k="${k}" class="${k===tab?'on':''}">${{pb:'PB',n1:'Nivel 1',n2:'Nivel 2',gen:'Generales'}[k]}</button>`).join('');
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { tab = b.dataset.k; pintarInicio(); $('#scrollInicio').scrollTop = 0; });
+}
+function pintarPlano(){
+  const w = $('#planoWrap');
+  if (tab==='gen'){ w.hidden = true; $('#leyenda').hidden = true; return; }
+  w.hidden = false; $('#leyenda').hidden = false;
+  const p = P.planos[tab], W = p.w, H = p.h, fs = W*0.026;
+  let s = `<svg viewBox="0 0 ${W} ${H}">`;
+  for (const a of p.areas){
+    const id = tab+'-'+a[0], [x,y,ww,hh] = a.slice(2).map((v,i) => v*(i%2?H:W)/100), n = RES[id].n;
+    s += `<g class="area ${claseDe(id)}" data-id="${id}"><rect x="${x}" y="${y}" width="${ww}" height="${hh}" rx="12"/>${n?`<text x="${x+ww/2}" y="${y+hh/2+fs*0.35}" text-anchor="middle" font-size="${fs}">${n}</text>`:''}</g>`;
+  }
+  w.innerHTML = `<div class="lienzo" style="width:max(100%, ${tab==='pb'?900:640}px)"><img src="${p.img}" alt="">${s}</svg></div>`;
+  if (tab==='pb') w.scrollLeft = 0;
+  w.querySelectorAll('g.area').forEach(g => g.onclick = () => abrirChat(g.dataset.id));
+  $('#leyenda').innerHTML = `<span style="width:100%">Desliza el plano a los lados para ver toda la planta.</span><span><i style="border:1.5px dashed var(--sin)"></i>Sin revisar</span><span><i style="background:var(--sin)"></i>Con registros</span><span><i style="background:var(--pend)"></i>Pendientes</span><span><i style="background:var(--listo)"></i>Listo</span>`;
+}
+function prevTxt(u){
+  if (!u) return '<span style="opacity:.7">Toca para empezar</span>';
+  if (u.tipo==='foto') return ic('imagen') + 'Foto';
+  if (u.tipo==='video') return ic('video') + 'Video';
+  if (u.tipo==='audio') return ic('mic','style="color:#53bdeb"') + mmss(u.dur);
+  return esc(u.texto);
+}
+function filaHTML(a){
+  const r = RES[a.id], c = claseDe(a.id);
+  return `<button class="fila" data-id="${a.id}"><div class="av ${c}">${esc(iniciales(a.nombre))}</div><div class="txt">
+    <div class="l1"><span class="nom">${esc(a.nombre)}</span><span class="hr">${r.ultimo?cuandoCorto(r.ultimo.fecha):''}</span></div>
+    <div class="l2"><span class="prev">${prevTxt(r.ultimo)}</span>${r.nuevos?`<span class="badge">${r.nuevos}</span>`:''}</div></div></button>`;
+}
+function pintarLista(){
+  const lista = Object.values(AREAS).filter(a => a.nivel===tab);
+  $('#lista').innerHTML = `<div class="seccion">${tab==='gen'?'Lo que no cae en un cuarto':'Áreas · toca una en el plano o en la lista'}</div>` + lista.map(filaHTML).join('');
+  $('#lista').querySelectorAll('.fila').forEach(b => b.onclick = () => abrirChat(b.dataset.id));
+}
+function pintarInicio(){ pintarTabs(); pintarPlano(); pintarLista(); }
+
+// ---------- Chat ----------
+function soltarUrls(){ urls.forEach(u => URL.revokeObjectURL(u)); urls = []; }
+const url = b => { const u = URL.createObjectURL(b); urls.push(u); return u; };
+
+async function abrirChat(id){
+  abierta = id; history.pushState({v:'chat'}, '');
+  $('#inicio').hidden = true; $('#chat').hidden = false;
+  pintarCabecera(); await pintarMensajes(true);
+}
+function cerrarChat(){
+  if (rec) descartarGrab();
+  pararAudio(); abierta = null; soltarUrls();
+  $('#chat').hidden = true; $('#inicio').hidden = false; pintarInicio();
+}
+function pintarCabecera(){
+  const a = AREAS[abierta], c = claseDe(abierta), e = ESTADOS[abierta]||'sin';
+  $('#chatAv').className = 'av ' + c; $('#chatAv').textContent = iniciales(a.nombre);
+  $('#chatNombre').textContent = a.nombre;
+  $('#chatSub').textContent = NIVELES[a.nivel] + ' · ' + {sin:'sin revisar', pend:'con pendientes', listo:'listo para entregar'}[e];
+  $('#estados').innerHTML = [['sin','Sin revisar'],['pend','Pendientes'],['listo','Listo']].map(([k,n]) => `<button data-e="${k}" class="${e===k?'on':''}">${n}</button>`).join('');
+  $('#estados').querySelectorAll('button').forEach(b => b.onclick = async () => { ESTADOS[abierta] = b.dataset.e; await kvSet('estados', ESTADOS); pintarCabecera(); });
+}
+const ticks = m => m.exportado ? `<span class="ok">${ic('doble')}</span>` : ic('check');
+
+function burbuja(m, cont){
+  const h = `<span class="hora">${hora(m.fecha)} ${ticks(m)}</span>`;
+  const cl = 'b' + (cont?' cont':'');
+  if (m.tipo==='texto') return `<div class="${cl}" data-id="${m.id}"><span class="t">${esc(m.texto)}</span>${h}</div>`;
+  if (m.tipo==='foto') return `<div class="${cl} media" data-id="${m.id}">${m.thumb?`<img class="img" src="${url(m.thumb)}" alt="">`:`<div class="img" style="display:grid;place-items:center;color:var(--muted)">${ic('imagen')}</div>`}${h}</div>`;
+  if (m.tipo==='video') return `<div class="${cl} media" data-id="${m.id}"><video class="img" src="${url(m.blob)}#t=0.3" preload="metadata" muted playsinline></video><div class="play"><span>${'<svg class="i" viewBox="0 0 24 24">'+IC.play+'</svg>'}</span></div>${h}</div>`;
+  if (m.tipo==='audio') return `<div class="${cl}" data-id="${m.id}"><div class="aud"><button class="pb" data-play="${m.id}"><svg class="i" viewBox="0 0 24 24">${IC.play}</svg></button><div class="barra"><i></i><b></b></div><div class="mic">${ic('mic')}</div></div><div class="aud-pie"><span class="dur" data-dur="${m.id}">${mmss(m.dur)}</span>${h}</div></div>`;
+  return '';
+}
+let MSGS = [];
+async function pintarMensajes(alFinal){
+  soltarUrls();
+  MSGS = (await msgsDe(abierta)).sort((a,b) => a.fecha.localeCompare(b.fecha));
+  const c = $('#mensajes'); let html = '', dia = '', prev = null;
+  if (!MSGS.length) html = `<div class="vacioChat">Manda aquí fotos, audios y notas de ${esc(AREAS[abierta].nombre)}. Todo queda guardado en este teléfono, aunque no haya señal.</div>`;
+  for (const m of MSGS){
+    const d = new Date(m.fecha).toDateString();
+    if (d !== dia){ html += `<div class="dia">${diaTxt(m.fecha)}</div>`; dia = d; prev = null; }
+    const cont = prev && (new Date(m.fecha) - new Date(prev.fecha) < 120000);
+    html += burbuja(m, cont); prev = m;
+  }
+  c.innerHTML = html;
+  c.querySelectorAll('.b').forEach(conectarBurbuja);
+  if (alFinal) requestAnimationFrame(() => c.scrollTop = c.scrollHeight);
+}
+function conectarBurbuja(el){
+  const m = MSGS.find(x => x.id === el.dataset.id); if (!m) return;
+  let t = null, largo = false, x0 = 0, y0 = 0;
+  el.addEventListener('pointerdown', e => { largo = false; x0 = e.clientX; y0 = e.clientY; t = setTimeout(() => { largo = true; el.classList.add('sel'); if (navigator.vibrate) navigator.vibrate(30); opcionesMsg(m, el); }, 480); });
+  const fuera = () => clearTimeout(t);
+  el.addEventListener('pointerup', fuera); el.addEventListener('pointercancel', fuera);
+  el.addEventListener('pointermove', e => { if (Math.abs(e.clientX-x0)+Math.abs(e.clientY-y0) > 12) clearTimeout(t); });
+  el.addEventListener('contextmenu', e => e.preventDefault());
+  el.addEventListener('click', e => {
+    if (largo) return;
+    const pb = e.target.closest('[data-play]'); if (pb){ tocarAudio(m, el); return; }
+    if (m.tipo==='foto' || m.tipo==='video') abrirVisor(m);
+  });
+}
+
+// ---------- Reproducir audios ----------
+const AUD = new Audio(); let audId = null, audEl = null;
+function pararAudio(){ AUD.pause(); if (audEl) pintarPlay(audEl, false); audId = null; audEl = null; }
+function pintarPlay(el, on){ const b = el.querySelector('.pb svg'); if (b) b.innerHTML = on ? IC.pausa : IC.play; }
+function tocarAudio(m, el){
+  if (audId === m.id){ if (AUD.paused){ AUD.play(); pintarPlay(el,true); } else { AUD.pause(); pintarPlay(el,false); } return; }
+  pararAudio(); audId = m.id; audEl = el;
+  AUD.src = url(m.blob); AUD.play().catch(e => toast('No pude reproducir: ' + e.message)); pintarPlay(el, true);
+}
+AUD.ontimeupdate = () => {
+  if (!audEl) return; const m = MSGS.find(x => x.id===audId); const d = (isFinite(AUD.duration) && AUD.duration) || (m && m.dur) || 1;
+  const p = Math.min(100, AUD.currentTime/d*100); audEl.querySelector('.barra i').style.width = p+'%'; audEl.querySelector('.barra b').style.left = `calc(${p}% - 6px)`;
+  audEl.querySelector('.dur').textContent = mmss(AUD.currentTime);
+};
+AUD.onended = () => { if (!audEl) return; const m = MSGS.find(x => x.id===audId); audEl.querySelector('.barra i').style.width='0'; audEl.querySelector('.barra b').style.left='-6px'; audEl.querySelector('.dur').textContent = mmss(m&&m.dur); pintarPlay(audEl,false); audId=null; audEl=null; };
+
+// ---------- Agregar mensajes ----------
+const nuevoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+async function agregar(area, tipo, datos){
+  const m = {id:nuevoId(), area, tipo, fecha:new Date().toISOString(), exportado:false, ...datos};
+  await msgPut(m);
+  const r = RES[area]; r.n++; r.nuevos++; r.ultimo = {tipo, texto:m.texto, dur:m.dur, fecha:m.fecha};
+  if (abierta === area){ pintarCabecera(); await pintarMensajes(true); }
+  return m;
+}
+async function miniatura(blob, max=520){
+  try {
+    const bm = await createImageBitmap(blob);
+    const s = Math.min(1, max/Math.max(bm.width, bm.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bm.width*s); c.height = Math.round(bm.height*s);
+    c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
+    return await new Promise(ok => c.toBlob(ok, 'image/jpeg', .74));
+  } catch(e){ return null; }
+}
+async function agregarArchivos(files){
+  const area = abierta; files = [...files]; if (!files.length) return;
+  let i = 0;
+  for (const f of files){
+    i++; if (files.length > 1) toast(`Guardando ${i} de ${files.length}…`, 0);
+    const tipo = f.type.startsWith('video') ? 'video' : f.type.startsWith('audio') || /\.(ogg|opus|m4a|mp3|aac|amr|wav)$/i.test(f.name) ? 'audio' : 'foto';
+    const d = {blob:f, nombre:f.name, tomada:f.lastModified ? new Date(f.lastModified).toISOString() : null};
+    if (tipo==='foto') d.thumb = await miniatura(f);
+    if (tipo==='audio') d.dur = await duracion(f);
+    await agregar(area, tipo, d);
+  }
+  toast(files.length > 1 ? `${files.length} archivos guardados.` : 'Guardado.');
+}
+function duracion(blob){ return new Promise(ok => { const a = new Audio(); const u = URL.createObjectURL(blob); a.preload='metadata'; a.onloadedmetadata = () => { URL.revokeObjectURL(u); ok(isFinite(a.duration)?a.duration:0); }; a.onerror = () => { URL.revokeObjectURL(u); ok(0); }; a.src = u; }); }
+
+$('#btnCam').onclick = () => $('#inCam').click();
+$('#btnClip').onclick = () => hoja(`<div class="gridOps">
+    <button data-a="gal"><span style="background:#bf59cf">${ic('imagen')}</span>Galería</button>
+    <button data-a="cam"><span style="background:#ff2e74">${ic('cam')}</span>Cámara</button>
+    <button data-a="aud"><span style="background:#f96533">${ic('audio')}</span>Audio</button></div>`, h => {
+  h.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { cerrarHoja(); $({gal:'#inGal', cam:'#inCam', aud:'#inAud'}[b.dataset.a]).click(); });
+});
+for (const s of ['#inCam','#inGal','#inAud']) $(s).onchange = async e => { const f = [...e.target.files]; e.target.value = ''; await agregarArchivos(f); };
+
+const texto = $('#texto');
+function ajustarTexto(){ texto.style.height = '48px'; texto.style.height = Math.min(130, texto.scrollHeight) + 'px'; pintarAccion(); }
+texto.oninput = ajustarTexto;
+function pintarAccion(){
+  const b = $('#btnAccion');
+  if (rec || texto.value.trim()){ b.innerHTML = ic('enviar'); b.setAttribute('aria-label','Enviar'); }
+  else { b.innerHTML = ic('mic'); b.setAttribute('aria-label','Grabar audio'); }
+}
+$('#btnAccion').onclick = async () => {
+  if (rec){ terminarGrab(); return; }
+  const t = texto.value.trim();
+  if (t){ texto.value = ''; ajustarTexto(); await agregar(abierta, 'texto', {texto:t}); return; }
+  iniciarGrab();
+};
+
+// ---------- Grabar audio ----------
+let rec = null, recStream = null, recTrozos = [], recIni = 0, recReloj = null, recCancelar = false, recArea = null;
+async function iniciarGrab(){
+  if (!navigator.mediaDevices || !window.MediaRecorder){ toast('Este navegador no deja grabar. Usa Chrome.'); return; }
+  try { recStream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}}); }
+  catch(e){ toast('No tengo permiso del micrófono. Actívalo en los permisos del sitio.', 4000); return; }
+  const tipo = ['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+  rec = new MediaRecorder(recStream, tipo ? {mimeType:tipo} : {}); recTrozos = []; recCancelar = false; recArea = abierta;
+  rec.ondataavailable = e => { if (e.data.size) recTrozos.push(e.data); };
+  rec.onstop = async () => {
+    recStream.getTracks().forEach(t => t.stop()); clearInterval(recReloj);
+    const dur = (Date.now() - recIni)/1000, mime = rec.mimeType || tipo || 'audio/webm', area = recArea;
+    rec = null; modoGrab(false);
+    if (recCancelar || dur < 0.7) return;
+    const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
+    await agregar(area, 'audio', {blob:new Blob(recTrozos, {type:mime}), dur, nombre:'audio.'+ext});
+  };
+  rec.start(500); recIni = Date.now(); modoGrab(true);
+  if (navigator.vibrate) navigator.vibrate(25);
+  recReloj = setInterval(() => $('#recTiempo').textContent = mmss((Date.now()-recIni)/1000), 250);
+}
+function terminarGrab(){ if (rec && rec.state !== 'inactive') rec.stop(); }
+function descartarGrab(){ recCancelar = true; terminarGrab(); }
+function modoGrab(on){ $('#caja').hidden = on; $('#grabando').hidden = !on; $('#recTiempo').textContent = '0:00'; pintarAccion(); }
+$('#btnDescartar').onclick = descartarGrab;
+
+// ---------- Hoja inferior ----------
+function hoja(html, enlazar){
+  $('#hoja').innerHTML = '<div class="tira"></div>' + html; $('#hoja').hidden = false; $('#fondo').hidden = false;
+  if (enlazar) enlazar($('#hoja'));
+}
+function cerrarHoja(){ $('#hoja').hidden = true; $('#fondo').hidden = true; document.querySelectorAll('.b.sel').forEach(b => b.classList.remove('sel')); }
+$('#fondo').onclick = cerrarHoja;
+
+function opcionesMsg(m){
+  hoja(`<button class="op" data-a="mover">${ic('mover')}Mover a otra área</button>
+    <button class="op rojo" data-a="borrar">${ic('basura')}Borrar</button>`, h => {
+    h.querySelector('[data-a=mover]').onclick = () => elegirArea(m);
+    h.querySelector('[data-a=borrar]').onclick = () => borrarMsg(m);
+  });
+}
+function elegirArea(m, alTerminar){
+  let html = '<h3>Mover a…</h3>';
+  for (const n of ['pb','n1','n2','gen']){
+    html += `<div class="seccion">${NIVELES[n]}</div>`;
+    for (const a of Object.values(AREAS).filter(a => a.nivel===n && a.id!==m.area))
+      html += `<button class="op" data-id="${a.id}"><div class="av ${claseDe(a.id)}" style="width:34px;height:34px;font-size:12px">${esc(iniciales(a.nombre))}</div>${esc(a.nombre)}</button>`;
+  }
+  hoja(html, h => h.querySelectorAll('[data-id]').forEach(b => b.onclick = async () => {
+    const dest = b.dataset.id, orig = m.area;
+    m.area = dest; m.exportado = false; await msgPut(m); await recalcular(); cerrarHoja();
+    toast('Movido a ' + AREAS[dest].nombre + '.');
+    if (alTerminar) alTerminar(); else if (abierta === orig) await pintarMensajes(false);
+  }));
+}
+async function borrarMsg(m, alTerminar){
+  cerrarHoja();
+  if (!confirm('¿Borrar este mensaje? Se elimina del teléfono.')) return;
+  if (audId === m.id) pararAudio();
+  await msgDel(m.id); await recalcular();
+  if (alTerminar) alTerminar(); else await pintarMensajes(false);
+  pintarCabecera();
+}
+
+// ---------- Visor de fotos y videos ----------
+let visorMsg = null, visorUrl = null;
+function abrirVisor(m){
+  visorMsg = m; history.pushState({v:'visor'}, '');
+  visorUrl = URL.createObjectURL(m.blob);
+  $('#vMedio').innerHTML = m.tipo==='video' ? `<video src="${visorUrl}" controls autoplay playsinline></video>` : `<img src="${visorUrl}" alt="">`;
+  $('#vTitulo').textContent = AREAS[m.area].nombre;
+  $('#vSub').textContent = diaTxt(m.fecha) + ', ' + hora(m.fecha);
+  $('#visor').hidden = false;
+}
+function cerrarVisor(){ $('#visor').hidden = true; $('#vMedio').innerHTML = ''; if (visorUrl) URL.revokeObjectURL(visorUrl); visorUrl = null; visorMsg = null; }
+$('#vAtras').onclick = () => history.back();
+$('#vMover').onclick = () => { const m = visorMsg; elegirArea(m, async () => { history.back(); await pintarMensajes(false); }); };
+$('#vBorrar').onclick = () => { const m = visorMsg; borrarMsg(m, async () => { history.back(); await pintarMensajes(false); }); };
+
+// ---------- Botón atrás de Android ----------
+$('#btnAtras').onclick = () => history.back();
+window.addEventListener('popstate', () => {
+  if (!$('#hoja').hidden){ cerrarHoja(); history.pushState({v:'chat'}, ''); return; }
+  if (!$('#visor').hidden){ cerrarVisor(); return; }
+  if (!$('#chat').hidden){ cerrarChat(); return; }
+});
+
+// ---------- Menú: enviar a la PC ----------
+$('#btnMenu').onclick = async () => {
+  const todos = await msgsTodos(), nuevos = todos.filter(m => !m.exportado).length;
+  let uso = '';
+  try { const e = await navigator.storage.estimate(); uso = `${(e.usage/1048576).toFixed(0)} MB usados en este teléfono`; } catch(e){}
+  hoja(`<h3>Enviar a la PC</h3><p>Arma un .zip con fotos, audios y notas, ordenados por área, para pasarlo por WhatsApp, Drive o cable.</p>
+    <button class="op" data-a="nuevo">${ic('subir')}<div>Solo lo nuevo<small>${nuevos} mensaje(s) sin enviar · los ya enviados tienen ✓✓ azul</small></div></button>
+    <button class="op" data-a="todo">${ic('disco')}<div>Todo otra vez<small>${todos.length} mensaje(s)</small></div></button>
+    <div class="seccion">${uso}</div>
+    <button class="op" data-a="candado">${ic('candado')}<div>Bloquear<small>Vuelve a pedir la clave (no borra nada)</small></div></button>`, h => {
+    h.querySelector('[data-a=nuevo]').onclick = () => exportar(false);
+    h.querySelector('[data-a=todo]').onclick = () => exportar(true);
+    h.querySelector('[data-a=candado]').onclick = async () => { await kvSet('payload', null); location.reload(); };
+  });
+};
+
+const CRC = (() => { const t = new Uint32Array(256); for (let n=0;n<256;n++){ let c=n; for (let k=0;k<8;k++) c = c&1 ? 0xEDB88320^(c>>>1) : c>>>1; t[n]=c>>>0; } return t; })();
+function crc32(u8){ let c = 0xFFFFFFFF; for (let i=0;i<u8.length;i++) c = CRC[(c^u8[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+async function hacerZip(entradas, avance){
+  const partes = [], central = [], enc = new TextEncoder(), f = new Date();
+  const dt = (f.getHours()<<11)|(f.getMinutes()<<5)|(f.getSeconds()>>1), dd = ((f.getFullYear()-1980)<<9)|((f.getMonth()+1)<<5)|f.getDate();
+  let off = 0;
+  for (let i=0;i<entradas.length;i++){
+    const e = entradas[i]; if (avance) avance(i+1, entradas.length);
+    const data = new Uint8Array(await e.blob.arrayBuffer()), crc = crc32(data), n = enc.encode(e.nombre), sz = data.length;
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true); h.setUint16(4,20,true); h.setUint16(6,0x0800,true); h.setUint16(8,0,true);
+    h.setUint16(10,dt,true); h.setUint16(12,dd,true); h.setUint32(14,crc,true); h.setUint32(18,sz,true); h.setUint32(22,sz,true);
+    h.setUint16(26,n.length,true); h.setUint16(28,0,true);
+    partes.push(h.buffer, n, e.blob);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true); c.setUint16(4,20,true); c.setUint16(6,20,true); c.setUint16(8,0x0800,true); c.setUint16(10,0,true);
+    c.setUint16(12,dt,true); c.setUint16(14,dd,true); c.setUint32(16,crc,true); c.setUint32(20,sz,true); c.setUint32(24,sz,true);
+    c.setUint16(28,n.length,true); c.setUint32(42,off,true);
+    central.push(c.buffer, n);
+    off += 30 + n.length + sz;
+  }
+  let cd = 0; for (const p of central) cd += p.byteLength;
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0,0x06054b50,true); end.setUint16(8,entradas.length,true); end.setUint16(10,entradas.length,true); end.setUint32(12,cd,true); end.setUint32(16,off,true);
+  return new Blob([...partes, ...central, end.buffer], {type:'application/zip'});
+}
+const sello = d => { const f = new Date(d), p = n => String(n).padStart(2,'0'); return `${f.getFullYear()}-${p(f.getMonth()+1)}-${p(f.getDate())} ${p(f.getHours())}-${p(f.getMinutes())}-${p(f.getSeconds())}`; };
+function extension(m){
+  const n = (m.nombre||'').match(/\.([a-z0-9]{2,5})$/i); if (n) return n[1].toLowerCase();
+  const t = (m.blob && m.blob.type) || '';
+  return t.includes('jpeg')?'jpg':t.includes('png')?'png':t.includes('mp4')?(m.tipo==='audio'?'m4a':'mp4'):t.includes('webm')?'webm':t.includes('ogg')?'ogg':'bin';
+}
+async function exportar(todo){
+  cerrarHoja();
+  const lista = (await msgsTodos()).filter(m => todo || !m.exportado).sort((a,b) => a.fecha.localeCompare(b.fecha));
+  if (!lista.length){ toast('No hay nada nuevo por enviar.'); return; }
+  const entradas = [], mensajes = [];
+  for (const m of lista){
+    const a = AREAS[m.area]; if (!a) continue;
+    const reg = {id:m.id, area:m.area, carpeta:a.carpeta, tipo:m.tipo, fecha:m.fecha, texto:m.texto||null, dur:m.dur||null, tomada:m.tomada||null, original:m.nombre||null, archivo:null};
+    if (m.blob){
+      const nombre = `${sello(m.fecha)} ${m.tipo} ${m.id.slice(-4)}.${extension(m)}`;
+      reg.archivo = `areas/${a.carpeta}/${nombre}`;
+      entradas.push({nombre:reg.archivo, blob:m.blob});
+    }
+    mensajes.push(reg);
+  }
+  const json = {origen:'telefono', titulo:P.titulo, exportado:new Date().toISOString(), estados:ESTADOS,
+    areas:Object.fromEntries(Object.values(AREAS).map(a => [a.id, {nivel:NIVELES[a.nivel], nombre:a.nombre, carpeta:a.carpeta}])), mensajes};
+  entradas.push({nombre:'recorrido-telefono.json', blob:new Blob([JSON.stringify(json, null, 2)], {type:'application/json'})});
+  let zip;
+  try { zip = await hacerZip(entradas, (i,n) => toast(`Armando el zip: ${i} de ${n}…`, 0)); }
+  catch(e){ toast('No pude armar el zip: ' + e.message, 5000); return; }
+  const nombreZip = `recorrido ${(P.titulo||'').trim()} ${sello(new Date())}.zip`.replace(/\s+/g,' ');
+  const file = new File([zip], nombreZip, {type:'application/zip'});
+  const mb = (zip.size/1048576).toFixed(1);
+  $('#toast').hidden = true;
+  const marcar = async () => { for (const m of lista){ m.exportado = true; await msgPut(m); } await recalcular(); if (abierta) await pintarMensajes(false); else pintarInicio(); };
+  const puedeCompartir = navigator.canShare && navigator.canShare({files:[file]});
+  hoja(`<h3>Zip listo · ${mb} MB</h3><p>${lista.length} mensaje(s). Pásalo a la PC y dile a Claude "importa el recorrido del teléfono".</p>
+    ${puedeCompartir?`<button class="op" data-a="comp">${ic('subir')}<div>Compartir<small>WhatsApp, Drive, correo…</small></div></button>`:''}
+    <button class="op" data-a="desc">${ic('bajar')}<div>Guardar en Descargas<small>Lo pasas luego por cable o Drive</small></div></button>`, h => {
+    const c = h.querySelector('[data-a=comp]');
+    if (c) c.onclick = async () => { try { await navigator.share({files:[file], title:nombreZip}); cerrarHoja(); await marcar(); toast('Enviado. Los mensajes quedan con ✓✓ azul.'); } catch(e){ if (e.name!=='AbortError') toast('No se pudo compartir: ' + e.message, 4000); } };
+    h.querySelector('[data-a=desc]').onclick = async () => {
+      const u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = nombreZip; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 60000); cerrarHoja(); await marcar(); toast('Guardado en Descargas.');
+    };
+  });
+}
+
+// ---------- Arranque ----------
+$('#btnMenu').innerHTML = ic('mas'); $('#btnAtras').innerHTML = ic('atras'); $('#btnChatMenu').innerHTML = ic('mas');
+$('#btnClip').innerHTML = ic('clip'); $('#btnCam').innerHTML = ic('cam'); $('#btnDescartar').innerHTML = ic('basura');
+$('#vAtras').innerHTML = ic('atras'); $('#vMover').innerHTML = ic('mover'); $('#vBorrar').innerHTML = ic('basura');
+$('#btnChatMenu').onclick = () => hoja(`<h3>${esc(AREAS[abierta].nombre)}</h3>
+  <button class="op" data-a="gal">${ic('imagen')}Elegir varias fotos de la galería</button>
+  <button class="op" data-a="aud">${ic('audio')}Adjuntar un audio (de WhatsApp o la grabadora)</button>`, h => {
+  h.querySelector('[data-a=gal]').onclick = () => { cerrarHoja(); $('#inGal').click(); };
+  h.querySelector('[data-a=aud]').onclick = () => { cerrarHoja(); $('#inAud').click(); };
+});
+pintarAccion();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+(async () => {
+  try { await abrirDB(); } catch(e){ $('#errClave').textContent = 'Este navegador no deja guardar datos. Usa Chrome normal (no incógnito).'; return; }
+  P = await kvGet('payload');
+  if (P) await arrancar(); else $('#clave').focus();
+})();
+</script>
+</body>
+</html>
