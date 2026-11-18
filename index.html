@@ -141,6 +141,62 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #grabando .ib{color:var(--danger)}
 @keyframes late{50%{opacity:.2}}
 
+/* Cámara de varias fotos */
+#camara{position:fixed;inset:0;background:#000;z-index:33;display:flex;flex-direction:column}
+#camara video{flex:1;min-height:0;width:100%;object-fit:cover;background:#000}
+.topCam{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top)) 10px 10px;z-index:2}
+.topCam .ib{background:#0006;color:#fff}
+.barraCam{display:flex;align-items:center;justify-content:space-between;padding:18px 28px calc(24px + env(safe-area-inset-bottom));background:#000}
+#disparo{width:76px;height:76px;border-radius:50%;border:5px solid #fff;background:#ffffff2e}
+#disparo:active{background:#fff}
+#camUltima{width:54px;height:54px;border-radius:10px;position:relative;background:#222;border:2px solid #fff}
+#camUltima img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+#camUltima span{position:absolute;top:-9px;right:-9px;background:var(--accent);color:#0b141a;border-radius:11px;min-width:22px;height:22px;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 5px}
+#camListo{width:54px;height:54px;border-radius:50%;background:var(--accent);color:#0b141a;display:grid;place-items:center}
+#camFlash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+
+/* Editor de fotos */
+#editor{position:fixed;inset:0;background:#000;z-index:31;display:flex;flex-direction:column;touch-action:none;user-select:none;-webkit-user-select:none}
+.topEd{display:flex;align-items:center;gap:2px;padding:calc(6px + env(safe-area-inset-top)) 6px 6px;flex:none}
+.topEd .ib{color:#fff}
+.topEd .ib.on{background:#ffffff33}
+.topEd .sp{flex:1}
+#escena{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#lienzoEd{position:relative;flex:none}
+#medioEd,#medioEd img,#medioEd video{display:block;width:100%;height:100%}
+#medioEd img{-webkit-user-drag:none;pointer-events:none}
+#trazos{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#capas{position:absolute;inset:0}
+#editor.lapiz #trazos{pointer-events:auto}
+#editor.lapiz #capas{pointer-events:none}
+.capa{position:absolute;left:0;top:0;white-space:pre;font-weight:800;line-height:1.15;text-align:center;font-family:system-ui,Roboto,"Segoe UI",sans-serif;cursor:move}
+.capa.texto{text-shadow:0 0 .12em rgba(0,0,0,.6)}
+.capa.etiqueta{padding:.25em .6em;border-radius:.5em}
+.capa.sel{outline:2px dashed #ffffffcc;outline-offset:6px}
+.capa .x{position:absolute;top:-17px;right:-17px;width:26px;height:26px;border-radius:50%;background:var(--danger);color:#fff;font:700 18px/1 system-ui;display:none;place-items:center;text-shadow:none;padding:0}
+.capa.sel .x{display:grid}
+#paleta{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:9px;z-index:6}
+#paleta button{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 4px #0008}
+#paleta button.on{transform:scale(1.35)}
+#miniaturas{display:flex;gap:6px;overflow-x:auto;padding:6px 8px 2px;flex:none;touch-action:pan-x;scrollbar-width:none}
+#miniaturas button{width:52px;height:52px;border-radius:6px;overflow:hidden;flex:none;border:2px solid transparent;position:relative;background:#222}
+#miniaturas button.on{border-color:var(--accent)}
+#miniaturas img,#miniaturas video{width:100%;height:100%;object-fit:cover;pointer-events:none}
+#miniaturas i{position:absolute;right:3px;bottom:3px;width:9px;height:9px;border-radius:50%;background:#ffcc00;border:1px solid #000}
+#miniaturas .mas{display:grid;place-items:center;color:#fff;border:1.5px dashed #ffffff88;background:none}
+#todasPie{padding:2px 14px 0;flex:none}
+#todasPie button{font-size:13px;color:#53bdeb;padding:4px 0}
+#pieEd{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(8px + env(safe-area-inset-bottom));flex:none}
+#pieEd .caja{background:#1f2c33}
+#escribir{position:absolute;inset:0;background:#000c;z-index:5;display:flex;flex-direction:column}
+#escribir textarea{flex:1;background:none;border:0;outline:none;text-align:center;font:800 32px/1.2 system-ui,Roboto,sans-serif;resize:none;padding:28vh 50px 0 20px;width:100%}
+.gridSt{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:4px 12px 12px}
+.gridSt button{font-size:32px;padding:6px 0;border-radius:10px}
+.gridSt button:active{background:#ffffff14}
+.gridEt{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 14px}
+.gridEt button{padding:9px 14px;border-radius:10px;color:#fff;font-weight:700}
+#visor .ib.on{background:#ffffff33}
+
 /* Hoja inferior, visor, toast */
 #fondo{position:fixed;inset:0;background:#0008;z-index:34}
 #hoja{position:fixed;left:0;right:0;bottom:0;background:var(--head);border-radius:18px 18px 0 0;z-index:35;padding:8px 0 calc(12px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;animation:sube .18s ease-out}
@@ -231,9 +287,30 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 <div id="visor" hidden>
   <header class="top"><button class="ib" id="vAtras"></button>
     <div class="titulo"><b id="vTitulo"></b><small id="vSub"></small></div>
-    <button class="ib" id="vStar"></button><button class="ib" id="vBorrar"></button></header>
+    <button class="ib" id="vOrig" aria-label="Ver original" hidden></button><button class="ib" id="vStar"></button><button class="ib" id="vBorrar"></button></header>
   <div class="medio" id="vMedio"></div>
   <div id="vPie" hidden></div>
+</div>
+<div id="camara" hidden>
+  <div class="topCam"><button class="ib" id="camCerrar" aria-label="Cerrar cámara"></button><button class="ib" id="camGirar" aria-label="Cambiar cámara"></button></div>
+  <video id="camVideo" autoplay playsinline muted></video>
+  <div id="camFlash"></div>
+  <div class="barraCam"><button id="camUltima" aria-label="Ver fotos tomadas"></button><button id="disparo" aria-label="Tomar foto"></button><button id="camListo" aria-label="Listo"></button></div>
+</div>
+<div id="editor" hidden>
+  <div class="topEd"><button class="ib" id="edCerrar" aria-label="Descartar"></button><span class="sp"></span>
+    <button class="ib" id="edDeshacer" aria-label="Deshacer trazo" hidden></button>
+    <button class="ib" id="edQuitar" aria-label="Quitar esta foto"></button>
+    <button class="ib" id="edSticker" aria-label="Stickers"></button>
+    <button class="ib" id="edEtiq" aria-label="Etiquetas"></button>
+    <button class="ib" id="edTexto" aria-label="Texto"></button>
+    <button class="ib" id="edLapiz" aria-label="Lápiz"></button></div>
+  <div id="escena"><div id="lienzoEd"><div id="medioEd"></div><canvas id="trazos"></canvas><div id="capas"></div></div></div>
+  <div id="paleta" hidden></div>
+  <div id="escribir" hidden><div class="topEd"><span class="sp"></span><button class="boton" id="escListo">Listo</button></div><textarea id="escTexto" rows="3" placeholder="Escribe…"></textarea></div>
+  <div id="miniaturas"></div>
+  <div id="todasPie" hidden><button id="btnTodasPie">Usar este comentario en todas</button></div>
+  <div id="pieEd"><div class="caja"><textarea id="pieTexto" rows="1" placeholder="Añade un comentario…"></textarea></div><button class="redondo" id="edEnviar" aria-label="Enviar"></button></div>
 </div>
 <div id="toast" hidden></div>
 
@@ -271,6 +348,12 @@ const IC = {
   estrella:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
   lapiz:'<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   copiar:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  etiqueta:'<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>',
+  letra:'<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
+  carita:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
+  girar:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  deshacer:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
 };
 const ic = (n, extra='') => `<svg class="i" viewBox="0 0 24 24" ${extra}>${IC[n]}</svg>`;
 const $ = s => document.querySelector(s);
@@ -646,14 +729,15 @@ async function agregarArchivos(files){
 }
 function duracion(blob){ return new Promise(ok => { const a = new Audio(); const u = URL.createObjectURL(blob); a.preload='metadata'; a.onloadedmetadata = () => { URL.revokeObjectURL(u); ok(isFinite(a.duration)?a.duration:0); }; a.onerror = () => { URL.revokeObjectURL(u); ok(0); }; a.src = u; }); }
 
-$('#btnCam').onclick = () => $('#inCam').click();
+$('#btnCam').onclick = () => abrirCamara();
 $('#btnClip').onclick = () => hoja(`<div class="gridOps">
     <button data-a="gal"><span style="background:#bf59cf">${ic('imagen')}</span>Galería</button>
     <button data-a="cam"><span style="background:#ff2e74">${ic('cam')}</span>Cámara</button>
     <button data-a="aud"><span style="background:#f96533">${ic('audio')}</span>Audio</button></div>`, h => {
-  h.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { cerrarHoja(); $({gal:'#inGal', cam:'#inCam', aud:'#inAud'}[b.dataset.a]).click(); });
+  h.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { cerrarHoja(); if (b.dataset.a === 'cam') abrirCamara(); else $({gal:'#inGal', aud:'#inAud'}[b.dataset.a]).click(); });
 });
-for (const s of ['#inCam','#inGal','#inAud']) $(s).onchange = async e => { const f = [...e.target.files]; e.target.value = ''; await agregarArchivos(f); };
+for (const s of ['#inCam','#inGal']) $(s).onchange = e => { const f = [...e.target.files]; e.target.value = ''; abrirEditor(f); };   // fotos y videos pasan por el editor
+$('#inAud').onchange = async e => { const f = [...e.target.files]; e.target.value = ''; await agregarArchivos(f); };
 
 const texto = $('#texto');
 function ajustarTexto(){ texto.style.height = '48px'; texto.style.height = Math.min(130, texto.scrollHeight) + 'px'; pintarAccion(); }
@@ -731,9 +815,10 @@ function abrirVisor(m){
   $('#vSub').textContent = diaTxt(m.fecha) + ', ' + hora(m.fecha);
   $('#vPie').hidden = !m.texto; $('#vPie').textContent = m.texto || '';
   $('#vStar').innerHTML = ic('estrella', m.destacado ? 'style="fill:currentColor"' : '');
+  $('#vOrig').hidden = !m.original || m.tipo !== 'foto'; $('#vOrig').classList.remove('on'); visorVerOrig = false;
   $('#visor').hidden = false;
 }
-function cerrarVisor(){ $('#visor').hidden = true; $('#vMedio').innerHTML = ''; if (visorUrl) URL.revokeObjectURL(visorUrl); visorUrl = null; visorMsg = null; }
+function cerrarVisor(){ $('#visor').hidden = true; $('#vMedio').innerHTML = ''; if (visorUrl) URL.revokeObjectURL(visorUrl); if (visorUrlOrig) URL.revokeObjectURL(visorUrlOrig); visorUrl = null; visorUrlOrig = null; visorMsg = null; }
 $('#vAtras').onclick = () => history.back();
 $('#vStar').onclick = async () => { const m = visorMsg; m.destacado = !m.destacado; tocar(m); await msgPut(m); $('#vStar').innerHTML = ic('estrella', m.destacado ? 'style="fill:currentColor"' : ''); await recalcular(); await pintarMensajes(false); };
 $('#vBorrar').onclick = async () => { const m = visorMsg; if (!confirm('¿Borrar este mensaje?')) return; await borrarUno(m); history.back(); await recalcular(); await pintarMensajes(false); pintarCabecera(); };
@@ -741,7 +826,11 @@ $('#vBorrar').onclick = async () => { const m = visorMsg; if (!confirm('¿Borrar
 // ---------- Botón atrás de Android ----------
 $('#btnAtras').onclick = () => history.back();
 window.addEventListener('popstate', () => {
+  if (saltarPop){ saltarPop = false; return; }
   if (!$('#hoja').hidden){ cerrarHoja(); if (!$('#chat').hidden) history.pushState({v:'chat'}, ''); return; }
+  if (!$('#escribir').hidden){ cerrarEscribir(); return; }
+  if (!$('#camara').hidden){ if (camFotos.length && !confirm(`¿Descartar ${camFotos.length} foto(s) tomadas?`)){ history.pushState({v:'camara'}, ''); return; } cerrarCamara(); return; }
+  if (!$('#editor').hidden){ if (!confirm('¿Descartar estas fotos?')){ history.pushState({v:'editor'}, ''); return; } limpiarEditor(); return; }
   if (!$('#visor').hidden){ cerrarVisor(); return; }
   if (selec.size){ limpiarSel(); history.pushState({v:'chat'}, ''); return; }
   if (!$('#chat').hidden){ cerrarChat(); return; }
@@ -821,10 +910,15 @@ async function exportar(todo){
   for (const m of lista){
     const a = AREAS[m.area]; if (!a) continue;
     const reg = {id:m.id, area:m.area, carpeta:a.carpeta, tipo:m.tipo, fecha:m.fecha, texto:m.texto||null, dur:m.dur||null, tomada:m.tomada||null, original:m.nombre||null,
-      destacado:!!m.destacado, editado:!!m.editado, reenviado:!!m.reenviado, responde_a:m.resp ? m.resp.id : null, archivo:null};
+      destacado:!!m.destacado, editado:!!m.editado, reenviado:!!m.reenviado, editada:!!m.editada, responde_a:m.resp ? m.resp.id : null, archivo:null};
     if (m.blob){
       reg.archivo = `areas/${a.carpeta}/${sello(m.fecha)} ${m.tipo} ${m.id.slice(-4)}.${extension(m)}`;
       if (todo || !m.exportado) entradas.push({nombre:reg.archivo, blob:m.blob});   // lo ya enviado solo manda su cambio, no el archivo otra vez
+    }
+    if (m.original){   // foto con dibujos: también va la original, sin tocar
+      const e0 = ((m.original.name||'').match(/\.([a-z0-9]{2,5})$/i) || [0,'jpg'])[1].toLowerCase();
+      reg.original_archivo = `areas/${a.carpeta}/originales/${sello(m.fecha)} ${m.tipo} ${m.id.slice(-4)} original.${e0}`;
+      if (todo || !m.exportado) entradas.push({nombre:reg.original_archivo, blob:m.original});
     }
     mensajes.push(reg);
   }
@@ -851,6 +945,330 @@ async function exportar(todo){
     };
   });
 }
+
+// ---------- Cámara: varias fotos seguidas, como WhatsApp ----------
+let saltarPop = false;                      // cerrar una pantalla por código sin que el "atrás" haga más cosas
+let camStream = null, camFotos = [], camFrente = false;
+async function prenderCam(){
+  apagarCam();
+  camStream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode: camFrente ? 'user' : {ideal:'environment'}, width:{ideal:3840}, height:{ideal:2160}}});
+  const v = $('#camVideo'); v.srcObject = camStream; v.style.transform = camFrente ? 'scaleX(-1)' : '';
+  try { await v.play(); } catch(e){}
+}
+function apagarCam(){ if (camStream){ camStream.getTracks().forEach(t => t.stop()); camStream = null; } $('#camVideo').srcObject = null; }
+async function abrirCamara(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ $('#inCam').click(); return; }
+  camFotos = [];
+  try { await prenderCam(); }
+  catch(e){ toast('No pude abrir la cámara aquí: uso la del teléfono.', 3000); $('#inCam').click(); return; }
+  history.pushState({v:'camara'}, ''); $('#camara').hidden = false; pintarCamUltima();
+}
+function cerrarCamara(){ apagarCam(); camFotos = []; $('#camara').hidden = true; pintarCamUltima(); }
+function pintarCamUltima(){
+  const b = $('#camUltima'), n = camFotos.length;
+  if (b.dataset.url) URL.revokeObjectURL(b.dataset.url);
+  b.dataset.url = '';
+  b.style.visibility = n ? '' : 'hidden'; $('#camListo').style.visibility = n ? '' : 'hidden';
+  if (!n){ b.innerHTML = ''; return; }
+  const u = URL.createObjectURL(camFotos[n-1]); b.dataset.url = u;
+  b.innerHTML = `<img src="${u}" alt=""><span>${n}</span>`;
+}
+$('#disparo').onclick = async () => {
+  const v = $('#camVideo'); if (!camStream || !v.videoWidth) return;
+  const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  const fl = $('#camFlash'); fl.style.transition = 'none'; fl.style.opacity = '.75';
+  requestAnimationFrame(() => requestAnimationFrame(() => { fl.style.transition = 'opacity .35s'; fl.style.opacity = '0'; }));
+  vibrar(15);
+  const b = await new Promise(ok => c.toBlob(ok, 'image/jpeg', .92));
+  camFotos.push(new File([b], `foto ${sello(new Date())} ${camFotos.length+1}.jpg`, {type:'image/jpeg', lastModified:Date.now()}));
+  pintarCamUltima();
+};
+function camListo(){
+  const fotos = camFotos; camFotos = []; apagarCam(); $('#camara').hidden = true; pintarCamUltima();
+  if (!$('#editor').hidden || !fotos.length){ saltarPop = true; history.back(); if (fotos.length) abrirEditor(fotos); return; }
+  abrirEditor(fotos, true);            // el editor usa la misma entrada del "atrás" que tenía la cámara
+}
+$('#camListo').onclick = camListo; $('#camUltima').onclick = camListo;
+$('#camCerrar').onclick = () => history.back();
+$('#camGirar').onclick = async () => { camFrente = !camFrente; try { await prenderCam(); } catch(e){ camFrente = !camFrente; toast('No pude cambiar de cámara.'); } };
+
+// ---------- Editor de fotos: comentario, lápiz, texto, etiquetas y stickers ----------
+const COLORES = ['#ffffff','#000000','#ff3b30','#ff9500','#ffcc00','#34c759','#00c7be','#007aff','#af52de'];
+const ETIQUETAS = [['Pendiente','#ff9500'],['Falta','#ff3b30'],['Reparar','#ff3b30'],['Fisura','#ff3b30'],['Filtración','#007aff'],['Revisar','#007aff'],
+  ['Medir','#5856d6'],['Retocar pintura','#ff9500'],['Cambiar','#ff3b30'],['Limpiar','#8e8e93'],['Listo','#34c759'],['OK','#34c759']];
+const STICKERS = '✅ ❌ ⚠️ ❗ ❓ 👉 👈 👆 👇 ➡️ ⬅️ ⬆️ ⬇️ ↗️ ↘️ ⭕ 🔴 🟠 🟡 🟢 🔧 🔨 🪛 🧱 💧 ⚡ 🔌 💡 🔥 🚿 🚽 🚪 🪟 🎨 🧹 📏 🚧 🛑 👍 👎'.split(' ');
+const ED = {items:[], i:0, lapiz:false, color:'#ff3b30', sel:null};
+const LZ = {w:1, h:1};
+const itemEd = () => ED.items[ED.i];
+const esVideoArch = f => (f.type||'').startsWith('video') || /\.(mp4|mov|webm|3gp|mkv)$/i.test(f.name||'');
+const FUENTE = 'system-ui, Roboto, "Segoe UI", sans-serif';
+
+function abrirEditor(files, sinPush){
+  files = [...files].filter(f => esVideoArch(f) || (f.type||'').startsWith('image') || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name||''));
+  if (!files.length) return;
+  const nuevos = files.map(f => ({file:f, url:URL.createObjectURL(f), video:esVideoArch(f), trazos:[], capas:[], pie:''}));
+  if (!$('#editor').hidden){ guardarPie(); ED.items.push(...nuevos); ED.i = ED.items.length - nuevos.length; ED.sel = null; pintarEditor(); return; }
+  ED.items = nuevos; ED.i = 0; ED.sel = null; ED.lapiz = false;
+  const t = texto.value.trim(); if (t && !editando){ ED.items[0].pie = t; texto.value = ''; ajustarTexto(); }
+  if (!sinPush) history.pushState({v:'editor'}, '');
+  $('#editor').hidden = false; pintarEditor();
+}
+function limpiarEditor(){
+  ED.items.forEach(it => URL.revokeObjectURL(it.url)); ED.items = []; ED.sel = null; ED.lapiz = false;
+  $('#editor').hidden = true; $('#escribir').hidden = true; $('#medioEd').innerHTML = ''; $('#miniaturas').innerHTML = '';
+}
+function salirEditor(){ limpiarEditor(); saltarPop = true; history.back(); }
+function guardarPie(){ const it = itemEd(); if (it) it.pie = $('#pieTexto').value; }
+function ajustarPie(){ const t = $('#pieTexto'); t.style.height = '48px'; t.style.height = Math.min(110, t.scrollHeight) + 'px'; }
+
+function herramientas(){
+  const it = itemEd(); if (!it) return;
+  $('#editor').classList.toggle('lapiz', ED.lapiz);
+  for (const b of ['#edSticker','#edEtiq','#edTexto','#edLapiz']) $(b).hidden = it.video;
+  $('#edLapiz').classList.toggle('on', ED.lapiz);
+  $('#edDeshacer').hidden = !(ED.lapiz && it.trazos.length);
+  pintarPaleta();
+}
+function pintarEditor(){
+  const it = itemEd(); if (!it) return;
+  herramientas();
+  const m = $('#medioEd');
+  m.innerHTML = it.video ? `<video src="${it.url}" controls playsinline></video>` : `<img src="${it.url}" alt="">`;
+  const el = m.firstElementChild;
+  if (it.video) el.onloadedmetadata = ajustarLienzo; else { el.onload = ajustarLienzo; if (el.complete) ajustarLienzo(); }
+  $('#pieTexto').value = it.pie; ajustarPie();
+  $('#todasPie').hidden = ED.items.length < 2;
+  pintarMiniaturas();
+}
+function ajustarLienzo(){
+  const it = itemEd(), el = $('#medioEd').firstElementChild; if (!it || !el) return;
+  const w = it.video ? el.videoWidth : el.naturalWidth, h = it.video ? el.videoHeight : el.naturalHeight; if (!w || !h) return;
+  const r = $('#escena').getBoundingClientRect(), k = Math.min(r.width/w, r.height/h);
+  LZ.w = Math.round(w*k); LZ.h = Math.round(h*k);
+  const lz = $('#lienzoEd'); lz.style.width = LZ.w + 'px'; lz.style.height = LZ.h + 'px';
+  const cv = $('#trazos'), dpr = window.devicePixelRatio || 1; cv.width = Math.round(LZ.w*dpr); cv.height = Math.round(LZ.h*dpr);
+  dibujarTrazos(); pintarCapas();
+}
+window.addEventListener('resize', () => { if (!$('#editor').hidden) ajustarLienzo(); });
+function pintarMiniaturas(){
+  const box = $('#miniaturas');
+  box.innerHTML = ED.items.map((it, i) => `<button data-i="${i}" class="${i===ED.i?'on':''}">${it.video ? `<video src="${it.url}#t=0.3" muted preload="metadata"></video>` : `<img src="${it.url}" alt="">`}${(it.trazos.length||it.capas.length)?'<i></i>':''}</button>`).join('')
+    + `<button class="mas" aria-label="Agregar más fotos">${ic('plus')}</button>`;
+  box.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { guardarPie(); ED.i = +b.dataset.i; ED.sel = null; pintarEditor(); });
+  box.querySelector('.mas').onclick = () => { guardarPie(); hoja(`<div class="gridOps">
+      <button data-a="cam"><span style="background:#ff2e74">${ic('cam')}</span>Cámara</button>
+      <button data-a="gal"><span style="background:#bf59cf">${ic('imagen')}</span>Galería</button></div>`, h => {
+    h.querySelector('[data-a=cam]').onclick = () => { cerrarHoja(); abrirCamara(); };
+    h.querySelector('[data-a=gal]').onclick = () => { cerrarHoja(); $('#inGal').click(); };
+  }); };
+  const on = box.querySelector('.on'); if (on) on.scrollIntoView({inline:'center', block:'nearest'});
+}
+
+// Lápiz: los trazos se guardan en proporción a la foto (0 a 1), así salen igual en la foto final.
+function trazar(g, W, H, trazos){
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  for (const t of trazos){
+    g.strokeStyle = t.c; g.lineWidth = t.w*W; g.beginPath();
+    t.pts.forEach(([x,y], i) => i ? g.lineTo(x*W, y*H) : g.moveTo(x*W, y*H));
+    if (t.pts.length === 1) g.lineTo(t.pts[0][0]*W + 0.5, t.pts[0][1]*H);
+    g.stroke();
+  }
+}
+function dibujarTrazos(){ const cv = $('#trazos'), g = cv.getContext('2d'), it = itemEd(); g.clearRect(0, 0, cv.width, cv.height); if (it) trazar(g, cv.width, cv.height, it.trazos); }
+let trazoAct = null;
+const normEd = e => { const r = $('#lienzoEd').getBoundingClientRect(); return [(e.clientX-r.left)/r.width, (e.clientY-r.top)/r.height]; };
+$('#trazos').addEventListener('pointerdown', e => {
+  if (!ED.lapiz) return; $('#trazos').setPointerCapture(e.pointerId);
+  trazoAct = {c:ED.color, w:0.009, pts:[normEd(e)]}; itemEd().trazos.push(trazoAct); dibujarTrazos();
+});
+$('#trazos').addEventListener('pointermove', e => { if (!trazoAct) return; trazoAct.pts.push(normEd(e)); dibujarTrazos(); });
+const finTrazo = () => { if (!trazoAct) return; trazoAct = null; herramientas(); pintarMiniaturas(); };
+$('#trazos').addEventListener('pointerup', finTrazo); $('#trazos').addEventListener('pointercancel', finTrazo);
+
+// Texto, etiquetas y stickers: capas que se mueven con un dedo y se agrandan/giran con dos.
+function estiloCapa(el, c){
+  el.style.fontSize = (c.s*LZ.w) + 'px';
+  el.style.transform = `translate(${c.x*LZ.w}px, ${c.y*LZ.h}px) translate(-50%,-50%) rotate(${c.r}rad)`;
+  if (c.tipo === 'etiqueta'){ el.style.background = c.bg; el.style.color = '#fff'; }
+  else if (c.tipo === 'texto') el.style.color = c.color;
+}
+function pintarCapas(){
+  const box = $('#capas'), it = itemEd(); box.innerHTML = ''; if (!it) return;
+  it.capas.forEach((c, i) => {
+    const el = document.createElement('div'); el.className = 'capa ' + c.tipo + (ED.sel === c ? ' sel' : ''); el.dataset.i = i;
+    const t = document.createElement('span'); t.textContent = c.txt; el.appendChild(t);
+    const x = document.createElement('button'); x.className = 'x'; x.textContent = '×'; x.setAttribute('aria-label', 'Quitar');
+    x.onclick = ev => { ev.stopPropagation(); it.capas.splice(it.capas.indexOf(c), 1); ED.sel = null; pintarCapas(); pintarPaleta(); pintarMiniaturas(); };
+    el.appendChild(x); estiloCapa(el, c); box.appendChild(el);
+  });
+}
+function marcarSel(){ const it = itemEd(); $('#capas').querySelectorAll('.capa').forEach(el => el.classList.toggle('sel', it.capas[+el.dataset.i] === ED.sel)); pintarPaleta(); }
+function moverCapa(c){ const el = $('#capas').querySelector(`.capa[data-i="${itemEd().capas.indexOf(c)}"]`); if (el) estiloCapa(el, c); }
+function nuevaCapa(c){ ED.lapiz = false; itemEd().capas.push(c); ED.sel = c; herramientas(); pintarCapas(); pintarMiniaturas(); }
+
+const GEST = {ptrs:new Map(), capa:null, base:null, movio:false, t0:0, eraSel:false};
+const dist = (a, b) => Math.hypot(a.x-b.x, a.y-b.y), ang = (a, b) => Math.atan2(b.y-a.y, b.x-a.x);
+const medio = p => ({x:(p[0].x+p[1].x)/2, y:(p[0].y+p[1].y)/2});
+const fotoGest = () => { const c = ED.sel; return {p:[...GEST.ptrs.values()].map(q => ({...q})), x:c&&c.x, y:c&&c.y, s:c&&c.s, r:c&&c.r}; };
+const escena = $('#escena');
+escena.addEventListener('pointerdown', e => {
+  const it = itemEd(); if (!it || ED.lapiz || it.video || e.target.closest('.x')) return;
+  escena.setPointerCapture(e.pointerId);
+  GEST.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (GEST.ptrs.size === 1){
+    GEST.movio = false; GEST.t0 = Date.now();
+    const el = e.target.closest('.capa');
+    if (el){ const c = it.capas[+el.dataset.i]; GEST.eraSel = ED.sel === c; ED.sel = c; GEST.capa = c; marcarSel(); }
+    else { GEST.capa = null; if (ED.sel){ ED.sel = null; marcarSel(); } }
+  }
+  GEST.base = fotoGest();
+});
+escena.addEventListener('pointermove', e => {
+  if (!GEST.ptrs.has(e.pointerId)) return;
+  GEST.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  const c = ED.sel, b = GEST.base; if (!c || !b) return;
+  const p = [...GEST.ptrs.values()];
+  if (p.length === 1 && GEST.capa){
+    const dx = p[0].x - b.p[0].x, dy = p[0].y - b.p[0].y; if (Math.abs(dx) + Math.abs(dy) > 5) GEST.movio = true;
+    c.x = Math.min(1, Math.max(0, b.x + dx/LZ.w)); c.y = Math.min(1, Math.max(0, b.y + dy/LZ.h));
+  } else if (p.length >= 2 && b.p.length >= 2){
+    c.s = Math.max(0.02, Math.min(0.7, b.s * dist(p[0], p[1]) / Math.max(1, dist(b.p[0], b.p[1]))));
+    c.r = b.r + ang(p[0], p[1]) - ang(b.p[0], b.p[1]);
+    const m0 = medio(b.p), m1 = medio(p); c.x = b.x + (m1.x-m0.x)/LZ.w; c.y = b.y + (m1.y-m0.y)/LZ.h; GEST.movio = true;
+  }
+  moverCapa(c);
+});
+const finGest = e => {
+  if (!GEST.ptrs.has(e.pointerId)) return;
+  GEST.ptrs.delete(e.pointerId);
+  if (!GEST.ptrs.size){
+    const c = GEST.capa;
+    if (c && !GEST.movio && GEST.eraSel && Date.now() - GEST.t0 < 400 && c.tipo !== 'sticker') abrirEscribir(c);   // tocar de nuevo = editar
+    GEST.capa = null;
+  }
+  GEST.base = fotoGest();
+};
+escena.addEventListener('pointerup', finGest); escena.addEventListener('pointercancel', finGest);
+
+// Pantalla para escribir (texto nuevo, o editar uno / una etiqueta)
+let escCapa = null;
+function abrirEscribir(c){
+  escCapa = c; ED.lapiz = false; herramientas();
+  const t = $('#escTexto'); t.value = c ? c.txt : '';
+  t.style.color = c && c.tipo === 'etiqueta' ? '#fff' : (c ? c.color : ED.color);
+  t.style.background = c && c.tipo === 'etiqueta' ? c.bg : 'transparent';
+  $('#escribir').hidden = false; pintarPaleta(); history.pushState({v:'escribir'}, '');
+  setTimeout(() => t.focus(), 60);
+}
+function cerrarEscribir(){
+  const t = $('#escTexto').value.replace(/\s+$/, ''), it = itemEd();
+  if (escCapa){ if (t) escCapa.txt = t; else { it.capas.splice(it.capas.indexOf(escCapa), 1); ED.sel = null; } }
+  else if (t){ const c = {tipo:'texto', txt:t, color:ED.color, x:.5, y:.4, s:.075, r:0}; it.capas.push(c); ED.sel = c; }
+  escCapa = null; $('#escribir').hidden = true; $('#escTexto').blur(); pintarCapas(); pintarPaleta(); pintarMiniaturas();
+}
+$('#escListo').onclick = () => { cerrarEscribir(); saltarPop = true; history.back(); };
+
+function pintarPaleta(){
+  const p = $('#paleta'), escribiendo = !$('#escribir').hidden, s = ED.sel;
+  const ver = ED.lapiz || escribiendo || (s && s.tipo !== 'sticker'); p.hidden = !ver; if (!ver) return;
+  const actual = escribiendo ? (escCapa && escCapa.tipo === 'etiqueta' ? escCapa.bg : (escCapa ? escCapa.color : ED.color)) : (!ED.lapiz && s ? (s.bg || s.color) : ED.color);
+  p.innerHTML = COLORES.map(c => `<button data-c="${c}" style="background:${c}" class="${c===actual?'on':''}" aria-label="Color ${c}"></button>`).join('');
+  p.querySelectorAll('button').forEach(b => b.onclick = () => elegirColor(b.dataset.c));
+}
+function elegirColor(c){
+  ED.color = c;
+  if (!$('#escribir').hidden){
+    const t = $('#escTexto');
+    if (escCapa && escCapa.tipo === 'etiqueta'){ escCapa.bg = c; t.style.background = c; } else { t.style.color = c; if (escCapa) escCapa.color = c; }
+  } else if (ED.sel && !ED.lapiz){
+    if (ED.sel.tipo === 'etiqueta') ED.sel.bg = c; else if (ED.sel.tipo === 'texto') ED.sel.color = c;
+    moverCapa(ED.sel);
+  }
+  pintarPaleta();
+}
+
+$('#edLapiz').onclick = () => { ED.lapiz = !ED.lapiz; ED.sel = null; marcarSel(); herramientas(); };
+$('#edDeshacer').onclick = () => { itemEd().trazos.pop(); dibujarTrazos(); herramientas(); pintarMiniaturas(); };
+$('#edTexto').onclick = () => { ED.sel = null; marcarSel(); abrirEscribir(null); };
+$('#edSticker').onclick = () => { ED.lapiz = false; herramientas();
+  hoja(`<h3>Stickers</h3><div class="gridSt">${STICKERS.map(s => `<button>${s}</button>`).join('')}</div>`,
+    h => h.querySelectorAll('.gridSt button').forEach(b => b.onclick = () => { cerrarHoja(); nuevaCapa({tipo:'sticker', txt:b.textContent, x:.5, y:.5, s:.14, r:0}); })); };
+$('#edEtiq').onclick = () => { ED.lapiz = false; herramientas();
+  hoja(`<h3>Etiquetas</h3><div class="gridEt">${ETIQUETAS.map(([t, c]) => `<button style="background:${c}" data-c="${c}">${esc(t)}</button>`).join('')}<button style="background:#3b4a54" data-otra="1">+ Otra…</button></div>`,
+    h => h.querySelectorAll('.gridEt button').forEach(b => b.onclick = () => {
+      cerrarHoja();
+      if (b.dataset.otra){ const c = {tipo:'etiqueta', txt:'', bg:['#ffffff','#000000'].includes(ED.color) ? '#ff3b30' : ED.color, x:.5, y:.5, s:.05, r:0}; itemEd().capas.push(c); ED.sel = c; pintarCapas(); abrirEscribir(c); }
+      else nuevaCapa({tipo:'etiqueta', txt:b.textContent, bg:b.dataset.c, x:.5, y:.5, s:.05, r:0});
+    })); };
+$('#edQuitar').onclick = () => {
+  const it = itemEd(); URL.revokeObjectURL(it.url); ED.items.splice(ED.i, 1);
+  if (!ED.items.length){ salirEditor(); return; }
+  ED.i = Math.min(ED.i, ED.items.length - 1); ED.sel = null; pintarEditor();
+};
+$('#edCerrar').onclick = () => history.back();
+$('#btnTodasPie').onclick = () => { const p = $('#pieTexto').value; ED.items.forEach(it => it.pie = p); toast(`Mismo comentario en las ${ED.items.length} fotos.`); };
+$('#pieTexto').oninput = () => { guardarPie(); ajustarPie(); };
+
+// Foto final: la original + trazos + capas, en una sola imagen (máx. 2560 px de lado).
+function redondeado(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x+r, y); g.arcTo(x+w, y, x+w, y+h, r); g.arcTo(x+w, y+h, x, y+h, r); g.arcTo(x, y+h, x, y, r); g.arcTo(x, y, x+w, y, r); g.closePath(); }
+function capaEnLienzo(g, W, H, c){
+  const fs = c.s*W, lineas = c.txt.split('\n'), lh = fs*1.15, alto = lh*lineas.length;
+  g.save(); g.translate(c.x*W, c.y*H); g.rotate(c.r);
+  g.font = `800 ${fs}px ${FUENTE}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  if (c.tipo === 'etiqueta'){
+    const w = Math.max(...lineas.map(l => g.measureText(l).width)) + fs*1.2, h = alto + fs*0.5;
+    g.fillStyle = c.bg; redondeado(g, -w/2, -h/2, w, h, fs*0.5); g.fill(); g.fillStyle = '#fff';
+  } else {
+    g.fillStyle = c.color || '#fff';
+    if (c.tipo === 'texto'){ g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = fs*0.12; }
+  }
+  lineas.forEach((l, i) => g.fillText(l, 0, -alto/2 + lh*(i + .5)));
+  g.restore();
+}
+async function componer(it){
+  const bm = await createImageBitmap(it.file);
+  const k = Math.min(1, 2560/Math.max(bm.width, bm.height)), W = Math.round(bm.width*k), H = Math.round(bm.height*k);
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
+  g.drawImage(bm, 0, 0, W, H); if (bm.close) bm.close();
+  trazar(g, W, H, it.trazos);
+  for (const c of it.capas) capaEnLienzo(g, W, H, c);
+  return await new Promise(ok => cv.toBlob(ok, 'image/jpeg', .9));
+}
+$('#edEnviar').onclick = async () => {
+  guardarPie();
+  const area = abierta, items = ED.items; ED.items = [];
+  $('#editor').hidden = true; $('#escribir').hidden = true; saltarPop = true; history.back();
+  let i = 0;
+  for (const it of items){
+    i++; if (items.length > 1) toast(`Guardando ${i} de ${items.length}…`, 0);
+    const d = {tomada: it.file.lastModified ? new Date(it.file.lastModified).toISOString() : null, nombre: it.file.name, blob: it.file};
+    if (!it.video && (it.trazos.length || it.capas.length)){
+      try { d.blob = await componer(it); d.original = it.file; d.editada = true; d.nombre = (it.file.name || 'foto').replace(/\.[^.]*$/, '') + ' editada.jpg'; }
+      catch(e){ toast('No pude guardar los dibujos de una foto; quedó la original.', 4000); d.blob = it.file; }
+    }
+    if (it.pie.trim()) d.texto = it.pie.trim();
+    if (!it.video) d.thumb = await miniatura(d.blob);
+    await agregar(area, it.video ? 'video' : 'foto', d);
+    URL.revokeObjectURL(it.url);
+  }
+  $('#medioEd').innerHTML = ''; $('#miniaturas').innerHTML = '';
+  toast(items.length > 1 ? `${items.length} fotos guardadas.` : 'Guardado.');
+};
+
+// Visor: ver la foto original (sin dibujos)
+let visorVerOrig = false, visorUrlOrig = null;
+$('#vOrig').onclick = () => {
+  const m = visorMsg; if (!m || !m.original) return; visorVerOrig = !visorVerOrig;
+  if (visorVerOrig && !visorUrlOrig) visorUrlOrig = URL.createObjectURL(m.original);
+  const img = $('#vMedio img'); if (img) img.src = visorVerOrig ? visorUrlOrig : visorUrl;
+  $('#vOrig').classList.toggle('on', visorVerOrig); toast(visorVerOrig ? 'Original, sin dibujos' : 'Con dibujos', 1500);
+};
+
+$('#camCerrar').innerHTML = ic('cerrar'); $('#camGirar').innerHTML = ic('girar'); $('#camListo').innerHTML = ic('check');
+$('#edCerrar').innerHTML = ic('cerrar'); $('#edDeshacer').innerHTML = ic('deshacer'); $('#edQuitar').innerHTML = ic('basura');
+$('#edSticker').innerHTML = ic('carita'); $('#edEtiq').innerHTML = ic('etiqueta'); $('#edTexto').innerHTML = ic('letra'); $('#edLapiz').innerHTML = ic('lapiz');
+$('#edEnviar').innerHTML = ic('enviar'); $('#vOrig').innerHTML = ic('imagen');
 
 // ---------- Arranque ----------
 $('#btnMenu').innerHTML = ic('mas'); $('#btnAtras').innerHTML = ic('atras'); $('#btnChatMenu').innerHTML = ic('mas');

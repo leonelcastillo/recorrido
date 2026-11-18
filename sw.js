@@ -1,6 +1,6 @@
 // Guarda la app en el teléfono para que abra sin señal. Cada obra tiene su propia caché.
 const PREFIJO = 'rec-raiz-';
-const VERSION = PREFIJO + '20261116224431';
+const VERSION = PREFIJO + '20261118125241';
 const ARCHIVOS = ['./', 'index.html', 'manifest.webmanifest', 'planos.enc', 'icon-192.png', 'icon-512.png'];
 const BASE = new URL('./', self.location).pathname;
 
