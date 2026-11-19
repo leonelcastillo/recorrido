@@ -288,6 +288,24 @@ details[open]>summary .flecha{transform:rotate(90deg)}
 #btnPdfGeneral{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}
 .btnAcc svg{width:18px;height:18px}
 
+/* Recortar y girar */
+#recorte{position:absolute;inset:0;z-index:4;touch-action:none}
+#cajaRec{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.62);
+  background-image:linear-gradient(to right,transparent 33.1%,rgba(255,255,255,.45) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.45) 66.6%,transparent 66.9%),
+  linear-gradient(to bottom,transparent 33.1%,rgba(255,255,255,.45) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.45) 66.6%,transparent 66.9%)}
+#cajaRec i{position:absolute;width:30px;height:30px;border:4px solid #fff}
+#cajaRec i[data-c=nw]{top:-6px;left:-6px;border-right:0;border-bottom:0}
+#cajaRec i[data-c=ne]{top:-6px;right:-6px;border-left:0;border-bottom:0}
+#cajaRec i[data-c=sw]{bottom:-6px;left:-6px;border-right:0;border-top:0}
+#cajaRec i[data-c=se]{bottom:-6px;right:-6px;border-left:0;border-top:0}
+#barraRec{display:flex;align-items:center;gap:6px;padding:12px 10px calc(16px + env(safe-area-inset-bottom));flex:none}
+#barraRec button{color:#fff;padding:10px 14px;border-radius:22px;display:flex;align-items:center;gap:7px;font-weight:600}
+#barraRec button svg{width:20px;height:20px}
+#barraRec .sp{flex:1}
+#recListo{background:var(--accent);color:var(--onAccent)!important}
+#editor:not(.recortando) #barraRec{display:none}
+#editor.recortando .topEd,#editor.recortando #miniaturas,#editor.recortando #todasPie,#editor.recortando #pieEd,#editor.recortando #paleta,#editor.recortando #trazos,#editor.recortando #capas{display:none!important}
+
 /* Hoja inferior, visor, toast */
 #fondo{position:fixed;inset:0;background:#0008;z-index:34}
 #hoja{position:fixed;left:0;right:0;bottom:0;background:var(--panel);color:var(--ink);box-shadow:0 -4px 20px rgba(0,0,0,.25);border-radius:18px 18px 0 0;z-index:35;padding:8px 0 calc(12px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;animation:sube .18s ease-out}
@@ -389,11 +407,13 @@ details[open]>summary .flecha{transform:rotate(90deg)}
   <div class="topEd"><button class="ib" id="edCerrar" aria-label="Descartar"></button><span class="sp"></span>
     <button class="ib" id="edDeshacer" aria-label="Deshacer trazo" hidden></button>
     <button class="ib" id="edQuitar" aria-label="Quitar esta foto"></button>
+    <button class="ib" id="edRecortar" aria-label="Recortar y girar"></button>
     <button class="ib" id="edSticker" aria-label="Stickers"></button>
     <button class="ib" id="edEtiq" aria-label="Etiquetas"></button>
     <button class="ib" id="edTexto" aria-label="Texto"></button>
     <button class="ib" id="edLapiz" aria-label="Lápiz"></button></div>
-  <div id="escena"><div id="lienzoEd"><div id="medioEd"></div><canvas id="trazos"></canvas><div id="capas"></div></div></div>
+  <div id="escena"><div id="lienzoEd"><div id="medioEd"></div><canvas id="trazos"></canvas><div id="capas"></div><div id="recorte" hidden><div id="cajaRec"><i data-c="nw"></i><i data-c="ne"></i><i data-c="sw"></i><i data-c="se"></i></div></div></div></div>
+  <div id="barraRec"><button id="recGirar" aria-label="Girar"></button><button id="recReset">Restablecer</button><span class="sp"></span><button id="recCancel">Cancelar</button><button id="recListo">Listo</button></div>
   <div id="paleta" hidden></div>
   <div id="escribir" hidden><div class="topEd"><span class="sp"></span><button class="boton" id="escListo">Listo</button></div><textarea id="escTexto" rows="3" placeholder="Escribe…"></textarea></div>
   <div id="miniaturas"></div>
@@ -441,6 +461,7 @@ const IC = {
   letra:'<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/>',
   carita:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
   girar:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+  recortar:'<path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/><path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/>',
   deshacer:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
   chev:'<polyline points="9 18 15 12 9 6"/>',
   sol:'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
@@ -919,6 +940,9 @@ $('#btnDescartar').onclick = descartarGrab;
 function hoja(html, enlazar){
   $('#hoja').innerHTML = '<div class="tira"></div>' + html; $('#hoja').hidden = false; $('#fondo').hidden = false; $('#hoja').scrollTop = 0;
   if (enlazar) enlazar($('#hoja'));
+  // al abrirse con un toque largo, el dedo que se levanta no debe tocar una opción por accidente
+  for (const s of ['#hoja', '#fondo']){ $(s).style.pointerEvents = 'none'; }
+  clearTimeout(hoja.t); hoja.t = setTimeout(() => { for (const s of ['#hoja', '#fondo']) $(s).style.pointerEvents = ''; }, 450);
 }
 function cerrarHoja(){ $('#hoja').hidden = true; $('#fondo').hidden = true; }
 $('#fondo').onclick = cerrarHoja;
@@ -958,6 +982,7 @@ window.addEventListener('popstate', () => {
   if (!$('#hoja').hidden){ cerrarHoja(); if (!$('#chat').hidden) history.pushState({v:'chat'}, ''); return; }
   if (!$('#escribir').hidden){ cerrarEscribir(); return; }
   if (!$('#camara').hidden){ if (camFotos.length && !confirm(`¿Descartar ${camFotos.length} foto(s) tomadas?`)){ history.pushState({v:'camara'}, ''); return; } cerrarCamara(); return; }
+  if (REC){ cerrarRecorte(); history.pushState({v:'editor'}, ''); return; }
   if (!$('#editor').hidden){ if (!confirm('¿Descartar estas fotos?')){ history.pushState({v:'editor'}, ''); return; } limpiarEditor(); return; }
   if (!$('#visor').hidden){ cerrarVisor(); return; }
   if (selec.size){ limpiarSel(); history.pushState({v:'chat'}, ''); return; }
@@ -1058,6 +1083,7 @@ async function exportar(todo){
   }
   const json = {origen:'telefono', titulo:P.titulo, exportado:new Date().toISOString(), estados:ESTADOS, borrados,
     plan_hechos: P.plan ? {version: P.plan.version, ids: (await kvGet('planHechos')) || {}} : null,
+    plan_asignaciones: P.plan ? {version: P.plan.version, ...((await kvGet('planAsign')) || {ids: {}, personas: []})} : null,
     areas:Object.fromEntries(Object.values(AREAS).map(a => [a.id, {nivel:NIVELES[a.nivel], nombre:a.nombre, carpeta:a.carpeta}])), mensajes};
   entradas.push({nombre:'recorrido-telefono.json', blob:new Blob([JSON.stringify(json, null, 2)], {type:'application/json'})});
   let zip;
@@ -1142,7 +1168,7 @@ const FUENTE = 'system-ui, Roboto, "Segoe UI", sans-serif';
 function abrirEditor(files, sinPush){
   files = [...files].filter(f => esVideoArch(f) || (f.type||'').startsWith('image') || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name||''));
   if (!files.length) return;
-  const nuevos = files.map(f => ({file:f, url:URL.createObjectURL(f), video:esVideoArch(f), trazos:[], capas:[], pie:''}));
+  const nuevos = files.map(f => ({file:f, orig:f, url:URL.createObjectURL(f), video:esVideoArch(f), trazos:[], capas:[], pie:''}));
   if (!$('#editor').hidden){ guardarPie(); ED.items.push(...nuevos); ED.i = ED.items.length - nuevos.length; ED.sel = null; pintarEditor(); return; }
   ED.items = nuevos; ED.i = 0; ED.sel = null; ED.lapiz = false;
   const t = texto.value.trim(); if (t && !editando){ ED.items[0].pie = t; texto.value = ''; ajustarTexto(); }
@@ -1160,7 +1186,7 @@ function ajustarPie(){ const t = $('#pieTexto'); t.style.height = '48px'; t.styl
 function herramientas(){
   const it = itemEd(); if (!it) return;
   $('#editor').classList.toggle('lapiz', ED.lapiz);
-  for (const b of ['#edSticker','#edEtiq','#edTexto','#edLapiz']) $(b).hidden = it.video;
+  for (const b of ['#edRecortar','#edSticker','#edEtiq','#edTexto','#edLapiz']) $(b).hidden = it.video;
   $('#edLapiz').classList.toggle('on', ED.lapiz);
   $('#edDeshacer').hidden = !(ED.lapiz && it.trazos.length);
   pintarPaleta();
@@ -1188,7 +1214,7 @@ function ajustarLienzo(){
 window.addEventListener('resize', () => { if (!$('#editor').hidden) ajustarLienzo(); });
 function pintarMiniaturas(){
   const box = $('#miniaturas');
-  box.innerHTML = ED.items.map((it, i) => `<button data-i="${i}" class="${i===ED.i?'on':''}">${it.video ? `<video src="${it.url}#t=0.3" muted preload="metadata"></video>` : `<img src="${it.url}" alt="">`}${(it.trazos.length||it.capas.length)?'<i></i>':''}</button>`).join('')
+  box.innerHTML = ED.items.map((it, i) => `<button data-i="${i}" class="${i===ED.i?'on':''}">${it.video ? `<video src="${it.url}#t=0.3" muted preload="metadata"></video>` : `<img src="${it.url}" alt="">`}${(it.trazos.length||it.capas.length||it.recortada)?'<i></i>':''}</button>`).join('')
     + `<button class="mas" aria-label="Agregar más fotos">${ic('plus')}</button>`;
   box.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { guardarPie(); ED.i = +b.dataset.i; ED.sel = null; pintarEditor(); });
   box.querySelector('.mas').onclick = () => { guardarPie(); hoja(`<div class="gridOps">
@@ -1248,7 +1274,7 @@ const medio = p => ({x:(p[0].x+p[1].x)/2, y:(p[0].y+p[1].y)/2});
 const fotoGest = () => { const c = ED.sel; return {p:[...GEST.ptrs.values()].map(q => ({...q})), x:c&&c.x, y:c&&c.y, s:c&&c.s, r:c&&c.r}; };
 const escena = $('#escena');
 escena.addEventListener('pointerdown', e => {
-  const it = itemEd(); if (!it || ED.lapiz || it.video || e.target.closest('.x')) return;
+  const it = itemEd(); if (!it || ED.lapiz || it.video || REC || e.target.closest('.x')) return;
   escena.setPointerCapture(e.pointerId);
   GEST.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
   if (GEST.ptrs.size === 1){
@@ -1378,8 +1404,8 @@ $('#edEnviar').onclick = async () => {
   for (const it of items){
     i++; if (items.length > 1) toast(`Guardando ${i} de ${items.length}…`, 0);
     const d = {tomada: it.file.lastModified ? new Date(it.file.lastModified).toISOString() : null, nombre: it.file.name, blob: it.file};
-    if (!it.video && (it.trazos.length || it.capas.length)){
-      try { d.blob = await componer(it); d.original = it.file; d.editada = true; d.nombre = (it.file.name || 'foto').replace(/\.[^.]*$/, '') + ' editada.jpg'; }
+    if (!it.video && (it.trazos.length || it.capas.length || it.recortada)){
+      try { d.blob = await componer(it); d.original = it.orig || it.file; d.editada = true; d.nombre = (it.file.name || 'foto').replace(/\.[^.]*$/, '') + ' editada.jpg'; }
       catch(e){ toast('No pude guardar los dibujos de una foto; quedó la original.', 4000); d.blob = it.file; }
     }
     if (!it.video){   // comprimir como WhatsApp
@@ -1478,6 +1504,7 @@ async function pintarPlan(conservar){
   const y = sc.scrollTop;
   planUrls.forEach(u => URL.revokeObjectURL(u)); planUrls = [];
   HECHOS = (await kvGet('planHechos')) || {};
+  await cargarAsign();
   await indexarFotos();
   const acts = pl.actividades, n = acts.length, hechas = acts.filter(a => HECHOS[a.id]).length, hoy = hoyISO();
   const det = (k, abrir, resumen, cuerpo, extraCls = '') => `<details class="blq${extraCls}" data-k="${k}"${(abiertos ? abiertos.has(k) : abrir) ? ' open' : ''}>${resumen}${cuerpo}</details>`;
@@ -1525,6 +1552,7 @@ async function pintarPlan(conservar){
 
 $('#lista').addEventListener('click', async e => {
   if (tab !== 'plan') return;
+  if (largoPlan){ largoPlan = false; return; }   // fue un toque largo (reasignar)
   const act = e.target.closest('.pact');
   if (e.target.closest('.chk') && act){
     const id = act.dataset.id; if (HECHOS[id]) delete HECHOS[id]; else HECHOS[id] = new Date().toISOString();
@@ -1778,6 +1806,155 @@ let ultimaRevision = 0;
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && P && navigator.onLine && Date.now() - ultimaRevision > 60000){ ultimaRevision = Date.now(); refrescarPlanos(); }
 });
+
+// ---------- Recortar y girar (como WhatsApp). Si la foto ya tiene dibujos, quedan pegados a ella. ----------
+let REC = null;   // {base: Blob, rot: 0..3, c: [x, y, w, h] normalizado sobre la imagen ya girada, url}
+async function girarBlob(blob, rot, lado = 1600){
+  const bm = await createImageBitmap(blob), k = Math.min(1, lado / Math.max(bm.width, bm.height));
+  const w = Math.round(bm.width*k), h = Math.round(bm.height*k), r = ((rot % 4) + 4) % 4;
+  const c = document.createElement('canvas'); c.width = r % 2 ? h : w; c.height = r % 2 ? w : h;
+  const g = c.getContext('2d'); g.translate(c.width/2, c.height/2); g.rotate(r * Math.PI/2); g.drawImage(bm, -w/2, -h/2, w, h); if (bm.close) bm.close();
+  return c;
+}
+async function abrirRecorte(){
+  const it = itemEd(); if (!it || it.video || REC) return;
+  ED.lapiz = false; ED.sel = null; herramientas(); marcarSel();
+  toast('Preparando…', 0);
+  let base = it.file;
+  try { if (it.trazos.length || it.capas.length) base = await componer(it); } catch(e){}
+  REC = {base, rot: 0, c: [0, 0, 1, 1], url: null};
+  $('#toast').hidden = true;
+  $('#editor').classList.add('recortando'); $('#recorte').hidden = false;
+  await vistaRecorte();
+}
+async function vistaRecorte(){
+  const cv = await girarBlob(REC.base, REC.rot);
+  const b = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', .85));
+  if (REC.url) URL.revokeObjectURL(REC.url); REC.url = URL.createObjectURL(b);
+  const m = $('#medioEd'); m.innerHTML = `<img src="${REC.url}" alt="">`; const el = m.firstElementChild;
+  await new Promise(ok => { el.onload = ok; if (el.complete) ok(); });
+  ajustarLienzo(); pintarCaja();
+}
+function pintarCaja(){
+  const [x, y, w, h] = REC.c, k = $('#cajaRec');
+  k.style.left = x*100 + '%'; k.style.top = y*100 + '%'; k.style.width = w*100 + '%'; k.style.height = h*100 + '%';
+}
+function cerrarRecorte(){
+  if (REC && REC.url) URL.revokeObjectURL(REC.url);
+  REC = null; $('#recorte').hidden = true; $('#editor').classList.remove('recortando'); pintarEditor();
+}
+async function aplicarRecorte(){
+  const it = itemEd(), [x, y, w, h] = REC.c;
+  if (REC.rot === 0 && x < .001 && y < .001 && w > .999 && h > .999 && REC.base === it.file){ cerrarRecorte(); return; }
+  toast('Aplicando…', 0);
+  try {
+    const cv = await girarBlob(REC.base, REC.rot, 4096);
+    const sx = Math.round(x*cv.width), sy = Math.round(y*cv.height), sw = Math.max(1, Math.round(w*cv.width)), sh = Math.max(1, Math.round(h*cv.height));
+    const out = document.createElement('canvas'); out.width = sw; out.height = sh; out.getContext('2d').drawImage(cv, sx, sy, sw, sh, 0, 0, sw, sh);
+    const b = await new Promise(ok => out.toBlob(ok, 'image/jpeg', .92));
+    URL.revokeObjectURL(it.url);
+    it.file = new File([b], ((it.orig || it.file).name || 'foto').replace(/\.[^.]*$/, '') + '.jpg', {type: 'image/jpeg', lastModified: (it.orig || it.file).lastModified || Date.now()});
+    it.url = URL.createObjectURL(it.file); it.trazos = []; it.capas = []; it.recortada = true;
+    toast('Listo.', 1200);
+  } catch(e){ toast('No pude recortar: ' + e.message, 4000); }
+  cerrarRecorte();
+}
+(() => {   // arrastrar las esquinas para recortar, o el centro para mover el recuadro
+  const R = $('#recorte'); let modo = null, p0 = null, c0 = null;
+  const pos = e => { const r = $('#lienzoEd').getBoundingClientRect(); return [(e.clientX - r.left)/r.width, (e.clientY - r.top)/r.height]; };
+  R.addEventListener('pointerdown', e => {
+    if (!REC) return; e.stopPropagation(); R.setPointerCapture(e.pointerId);
+    const esq = e.target.closest('[data-c]'), [x, y] = pos(e), c = REC.c;
+    modo = esq ? esq.dataset.c : (x >= c[0] && x <= c[0] + c[2] && y >= c[1] && y <= c[1] + c[3] ? 'mover' : null);
+    p0 = [x, y]; c0 = [...c];
+  });
+  R.addEventListener('pointermove', e => {
+    if (!REC || !modo) return;
+    const [px, py] = pos(e), dx = px - p0[0], dy = py - p0[1], MIN = .08; let [x, y, w, h] = c0;
+    if (modo === 'mover'){ x = Math.min(1 - w, Math.max(0, x + dx)); y = Math.min(1 - h, Math.max(0, y + dy)); }
+    else {
+      if (modo.includes('w')){ const nx = Math.min(x + w - MIN, Math.max(0, x + dx)); w += x - nx; x = nx; }
+      if (modo.includes('e')) w = Math.min(1 - x, Math.max(MIN, w + dx));
+      if (modo.includes('n')){ const ny = Math.min(y + h - MIN, Math.max(0, y + dy)); h += y - ny; y = ny; }
+      if (modo.includes('s')) h = Math.min(1 - y, Math.max(MIN, h + dy));
+    }
+    REC.c = [x, y, w, h]; pintarCaja();
+  });
+  const fin = () => { modo = null; };
+  R.addEventListener('pointerup', fin); R.addEventListener('pointercancel', fin);
+})();
+$('#edRecortar').onclick = abrirRecorte;
+$('#recGirar').onclick = async () => { const [x, y, w, h] = REC.c; REC.c = [1 - y - h, x, h, w]; REC.rot = (REC.rot + 1) % 4; await vistaRecorte(); };
+$('#recReset').onclick = async () => { REC.rot = 0; REC.c = [0, 0, 1, 1]; await vistaRecorte(); };
+$('#recCancel').onclick = cerrarRecorte;
+$('#recListo').onclick = aplicarRecorte;
+$('#edRecortar').innerHTML = ic('recortar'); $('#recGirar').innerHTML = ic('girar') + 'Girar';
+
+// ---------- Reasignar una acción (toque largo) y mandársela a la persona nueva ----------
+// Los cambios quedan en el teléfono (planAsign) y viajan en el zip; el próximo plan de la PC los respeta.
+let ASIGN = {ids: {}, personas: []};
+async function cargarAsign(){
+  ASIGN = (await kvGet('planAsign')) || {ids: {}, personas: []}; ASIGN.ids = ASIGN.ids || {}; ASIGN.personas = ASIGN.personas || [];
+  for (const x of ASIGN.personas) if (!P.plan.personas.find(p => p.id === x.id)) P.plan.personas.push(x);
+  for (const a of P.plan.actividades){ if (a._resp0 === undefined) a._resp0 = a.responsable; a.responsable = ASIGN.ids[a.id] || a._resp0; }
+}
+async function copiarAlPortapapeles(txt){
+  try { await navigator.clipboard.writeText(txt); return true; } catch(e){}
+  const t = document.createElement('textarea'); t.value = txt; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t);
+  t.select(); let ok = false; try { ok = document.execCommand('copy'); } catch(e){} t.remove(); return ok;
+}
+function textoUna(a, per){
+  return [`Hola ${per.nombre.split(' ')[0]}, te toca esta acción de la obra ${P.titulo}:`, '',
+    `${AREAS[a.area] ? AREAS[a.area].nombre + ': ' : ''}${a.titulo}${a.prioridad === 'alta' ? ' ⚠ prioridad' : ''}`,
+    ...(a.detalle ? [a.detalle] : []), ...(a.criterio ? ['Cómo se recibe: ' + a.criterio] : []), '',
+    'Cuando termines, mándame una foto. Cualquier duda me escribes.'].join('\n');
+}
+function reasignar(id){
+  const a = P.plan.actividades.find(x => x.id === id); if (!a) return;
+  const otras = P.plan.personas.filter(p => p.id !== a.responsable);
+  hoja(`<h3>${esc(a.id)} · ${esc(a.titulo)}</h3><p>La tiene <b>${esc(nomPer(a.responsable))}</b>. ¿A quién se la pasas?</p>` +
+    otras.map(p => `<button class="op" data-p="${esc(p.id)}"><div class="av" style="width:36px;height:36px;font-size:13px">${esc(iniciales(p.nombre))}</div><div>${esc(p.nombre)}<small>${esc(p.oficio || '')}</small></div></button>`).join('') +
+    `<button class="op" data-otra="1">${ic('plus')}<div>Otra persona…<small>Que no está en la lista</small></div></button>`, h => {
+    h.querySelectorAll('[data-p]').forEach(b => b.onclick = () => asignar(a, b.dataset.p));
+    h.querySelector('[data-otra]').onclick = async () => {
+      const n = (prompt('Nombre de la persona:') || '').trim(); if (!n) return;
+      const o = (prompt('Oficio (opcional):') || '').trim();
+      const pid = 'extra-' + n.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const x = {id: pid, nombre: n, oficio: o, telefono: ''};
+      if (!ASIGN.personas.find(p => p.id === pid)) ASIGN.personas.push(x);
+      if (!P.plan.personas.find(p => p.id === pid)) P.plan.personas.push(x);
+      await asignar(a, pid);
+    };
+  });
+}
+async function asignar(a, pid){
+  const antes = nomPer(a.responsable);
+  if (pid === a._resp0) delete ASIGN.ids[a.id]; else ASIGN.ids[a.id] = pid;
+  a.responsable = pid; await kvSet('planAsign', ASIGN); vibrar(20);
+  await pintarPlan(true);
+  const per = P.plan.personas.find(p => p.id === pid), nom = per.nombre.split(' ')[0];
+  hoja(`<h3>Ahora la tiene ${esc(per.nombre)}</h3><p>${esc(a.titulo)} · antes: ${esc(antes)}</p>
+    <button class="op" data-a="txt">${ic('copiar')}<div>Copiar mensaje para ${esc(nom)}<small>Solo esta acción, para pegar en su chat</small></div></button>
+    <button class="op" data-a="pdf">${ic('subir')}<div>Enviar su PDF<small>Su lista completa de pendientes, con fotos</small></div></button>
+    <button class="op" data-a="no">${ic('check')}<div>Listo, no enviar ahora</div></button>`, h => {
+    h.querySelector('[data-a=txt]').onclick = async () => { const ok = await copiarAlPortapapeles(textoUna(a, per)); cerrarHoja(); toast(ok ? `Copiado. Pégalo en el chat de ${nom}.` : 'No se pudo copiar.', 3500); };
+    h.querySelector('[data-a=pdf]').onclick = () => { cerrarHoja(); enviarPDF(pid); };
+    h.querySelector('[data-a=no]').onclick = cerrarHoja;
+  });
+}
+let largoPlan = false;
+(() => {   // toque largo sobre una acción = reasignar
+  const L = $('#lista'); let t = null, x0 = 0, y0 = 0;
+  L.addEventListener('pointerdown', e => {
+    if (tab !== 'plan') return; const act = e.target.closest('.pact'); if (!act || e.target.closest('.chk')) return;
+    x0 = e.clientX; y0 = e.clientY; largoPlan = false;
+    t = setTimeout(() => { largoPlan = true; vibrar(30); reasignar(act.dataset.id); }, 550);
+  });
+  const no = () => clearTimeout(t);
+  L.addEventListener('pointermove', e => { if (Math.abs(e.clientX - x0) + Math.abs(e.clientY - y0) > 10) no(); });
+  L.addEventListener('pointerup', no); L.addEventListener('pointercancel', no);
+  L.addEventListener('contextmenu', e => { if (tab === 'plan' && e.target.closest('.pact')) e.preventDefault(); });
+})();
 
 // ---------- Tema claro / oscuro (automático: el del teléfono) ----------
 const TEMAS = ['auto', 'claro', 'oscuro'];
