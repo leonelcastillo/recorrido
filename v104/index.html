@@ -3,15 +3,47 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
-<meta name="theme-color" content="#202c33">
+<meta name="theme-color" content="#0e1420">
+<script>try{var t=localStorage.getItem('tema');if(t==='claro')document.documentElement.dataset.theme='light';else if(t==='oscuro')document.documentElement.dataset.theme='dark';}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Recorrido de obra</title>
 <style>
+/* MiLibroDeObra · marino #0e1420→#16213a, tinta #1a2230, papel #f4f2ed, hueso #f2f0ec, naranja #c06818, ámbar #e0a35c, cobre #9a5312 */
 :root{
-  --bg:#0b141a; --panel:#111b21; --head:#202c33; --out:#005c4b; --ink:#e9edef; --muted:#8696a0;
-  --accent:#00a884; --line:#222d34; --pend:#f0913a; --listo:#25d366; --sin:#53bdeb; --danger:#f15c6d;
+  --bg:#f4f2ed; --panel:#ffffff; --panel2:#faf7f2; --campo:#ffffff; --chip:#ece6db;
+  --ink:#1a2230; --muted:#6b7280; --line:#e3ddd2;
+  --headBg:linear-gradient(135deg,#0e1420,#16213a); --headInk:#f2f0ec; --headMuted:#a9b3c7;
+  --out:#fbe3c4; --outInk:#1a2230; --outMeta:#8a6a45; --citaBg:rgba(26,34,48,.06);
+  --accent:#c06818; --onAccent:#ffffff; --link:#9a5312; --hl:#e0a35c;
+  --pend:#d64545; --listo:#2f9e63; --sin:#8090ad; --tocada:#e0a35c; --danger:#d64545;
+  --sombra:0 1px 3px rgba(26,34,48,.10); --patron:rgba(26,34,48,.05);
+  --planoFondo:#ffffff; --planoFiltro:none; --toque:rgba(127,127,127,.14);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme=light]){
+    --bg:#0e1420; --panel:#16213a; --panel2:#121b30; --campo:#1c2843; --chip:#1f2b47;
+    --ink:#f2f0ec; --muted:#9aa3b5; --line:#24304a;
+    --headBg:linear-gradient(135deg,#0a0f19,#121b30); --headInk:#f2f0ec; --headMuted:#8f9bb3;
+    --out:#3d2b16; --outInk:#f2f0ec; --outMeta:#d9b88a; --citaBg:rgba(0,0,0,.22);
+    --accent:#e0a35c; --onAccent:#0e1420; --link:#e0a35c; --hl:#e0a35c;
+    --pend:#ef6b5f; --listo:#4cc085; --sin:#7f8db0; --tocada:#e0a35c; --danger:#ef6b5f;
+    --sombra:none; --patron:rgba(255,255,255,.04);
+    --planoFondo:#121a2b; --planoFiltro:invert(.88) hue-rotate(180deg); --toque:rgba(255,255,255,.08);
+    color-scheme:dark;
+  }
+}
+:root[data-theme=dark]{
+  --bg:#0e1420; --panel:#16213a; --panel2:#121b30; --campo:#1c2843; --chip:#1f2b47;
+  --ink:#f2f0ec; --muted:#9aa3b5; --line:#24304a;
+  --headBg:linear-gradient(135deg,#0a0f19,#121b30); --headInk:#f2f0ec; --headMuted:#8f9bb3;
+  --out:#3d2b16; --outInk:#f2f0ec; --outMeta:#d9b88a; --citaBg:rgba(0,0,0,.22);
+  --accent:#e0a35c; --onAccent:#0e1420; --link:#e0a35c; --hl:#e0a35c;
+  --pend:#ef6b5f; --listo:#4cc085; --sin:#7f8db0; --tocada:#e0a35c; --danger:#ef6b5f;
+  --sombra:none; --patron:rgba(255,255,255,.04);
+  --planoFondo:#121a2b; --planoFiltro:invert(.88) hue-rotate(180deg); --toque:rgba(255,255,255,.08);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -22,119 +54,129 @@ input,textarea{font:inherit;color:var(--ink)}
 [hidden]{display:none!important}
 svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .pantalla{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg)}
-.top{background:var(--head);display:flex;align-items:center;gap:6px;padding:8px 6px 8px 14px;padding-top:calc(8px + env(safe-area-inset-top));min-height:58px;flex:none}
-.top h1{font-size:20px;font-weight:600;flex:1;margin:0}
-.ib{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--ink);flex:none}
-.ib:active{background:#ffffff1a}
-.tabs{display:flex;background:var(--head);flex:none;overflow-x:auto;scrollbar-width:none}
-.tabs button{flex:1 0 auto;padding:12px 12px 9px;color:var(--muted);font-weight:600;font-size:14px;border-bottom:3px solid transparent;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
-.tabs button.on{color:var(--accent);border-color:var(--accent)}
+.top{background:var(--headBg);color:var(--headInk);display:flex;align-items:center;gap:6px;padding:8px 6px 8px 12px;padding-top:calc(8px + env(safe-area-inset-top));min-height:58px;flex:none}
+.top h1{font-size:19px;font-weight:700;flex:1;margin:0;letter-spacing:.01em}
+.top h1 small{display:block;font-size:12px;font-weight:700;color:var(--hl);letter-spacing:.02em}
+.top .marca{width:34px;height:34px;flex:none;margin-right:4px}
+.ib{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:inherit;flex:none}
+.ib:active{background:var(--toque)}
+.tabs{display:flex;background:var(--headBg);flex:none;overflow-x:auto;scrollbar-width:none;box-shadow:0 2px 6px rgba(0,0,0,.18);position:relative;z-index:5}
+.tabs button{flex:1 0 auto;padding:11px 12px 9px;color:var(--headMuted);font-weight:700;font-size:13.5px;border-bottom:3px solid transparent;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.tabs button.on{color:var(--hl);border-color:var(--hl)}
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* Candado */
-#candado{align-items:center;justify-content:center;padding:24px;text-align:center;gap:14px}
-#candado .logo{width:84px;height:84px;border-radius:24px;background:var(--accent);display:grid;place-items:center;color:#0b141a}
-#candado .logo svg{width:46px;height:46px}
-#candado p{color:var(--muted);max-width:320px;margin:0}
-#candado input{width:100%;max-width:320px;background:var(--head);border:1px solid var(--line);border-radius:24px;padding:13px 18px;outline:none;text-align:center}
-.boton{background:var(--accent);color:#0b141a;font-weight:700;border-radius:24px;padding:12px 26px}
+#candado{align-items:center;justify-content:center;padding:24px;text-align:center;gap:14px;background:linear-gradient(160deg,#0e1420,#16213a);color:#f2f0ec}
+#candado .logo{width:92px;height:92px}
+#candado p{color:#a9b3c7;max-width:320px;margin:0}
+#candado .marcaTxt{font-size:15px;font-weight:700;letter-spacing:.02em;color:#e0a35c}
+#candado input{width:100%;max-width:320px;background:#1c2843;color:#f2f0ec;border:1px solid #2c3a5c;border-radius:24px;padding:13px 18px;outline:none;text-align:center}
+.boton{background:var(--accent);color:var(--onAccent);font-weight:700;border-radius:24px;padding:12px 26px}
+#candado .boton{background:#c06818;color:#fff}
 
 /* Plano */
-#planoWrap{margin:10px;border-radius:12px;overflow-x:auto;overflow-y:hidden;background:#1c1c1c;scrollbar-width:thin}
+#zonaPlano{padding-bottom:2px}
+#planoWrap{margin:10px;border-radius:14px;overflow-x:auto;overflow-y:hidden;background:var(--planoFondo);scrollbar-width:thin;box-shadow:var(--sombra);border:1px solid var(--line)}
 .lienzo{position:relative}
-.lienzo img{width:100%;display:block;filter:invert(.89) hue-rotate(180deg);user-select:none;-webkit-user-drag:none}
+.lienzo img{width:100%;display:block;filter:var(--planoFiltro);user-select:none;-webkit-user-drag:none}
 #planoWrap svg{position:absolute;inset:0;width:100%;height:100%}
-.area polygon{stroke-width:5;stroke-linejoin:round}
-.area.sin polygon{fill:rgba(83,189,235,.05);stroke:rgba(83,189,235,.55);stroke-dasharray:16 10}
-.area.tocada polygon{fill:rgba(83,189,235,.2);stroke:var(--sin)}
-.area.pend polygon{fill:rgba(240,145,58,.28);stroke:var(--pend)}
-.area.listo polygon{fill:rgba(37,211,102,.25);stroke:var(--listo)}
-.area:active polygon{fill:rgba(0,168,132,.45)}
-.area text{pointer-events:none;font-weight:800;fill:#fff;paint-order:stroke;stroke:#000;stroke-width:8px}
-.leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 14px 6px}
-.leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
-
-/* Lista estilo chats */
-.fila{display:flex;align-items:center;gap:13px;padding:0 14px;width:100%;text-align:left}
-.fila:active{background:#ffffff0d}
-.av{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;font-size:16px;background:#2a3942}
-.av.tocada{background:#1d6d8c}.av.pend{background:var(--pend)}.av.listo{background:#1fa855}
-.fila .txt{flex:1;min-width:0;border-bottom:1px solid var(--line);padding:13px 0}
-.fila .l1,.fila .l2{display:flex;align-items:center;gap:8px}
-.fila .nom{flex:1;font-weight:500;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fila .hr{font-size:12px;color:var(--muted)}
-.fila .prev{flex:1;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
-.fila .prev svg{width:16px;height:16px}
-.badge{background:var(--accent);color:#0b141a;border-radius:12px;min-width:21px;height:21px;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px}
+.area polygon{stroke-width:5;stroke-linejoin:round;transition:fill .15s}
+.area.sin polygon{fill:rgba(128,144,173,.06);stroke:var(--sin);stroke-opacity:.75;stroke-dasharray:16 10}
+.area.tocada polygon{fill:rgba(224,163,92,.24);stroke:var(--tocada)}
+.area.pend polygon{fill:rgba(214,69,69,.22);stroke:var(--pend)}
+.area.listo polygon{fill:rgba(47,158,99,.22);stroke:var(--listo)}
+.area.sel polygon{stroke:var(--accent);stroke-width:12;stroke-dasharray:none;fill:rgba(192,104,24,.30)}
+.area:active polygon{fill:rgba(192,104,24,.40)}
+.area text{pointer-events:none;font-weight:800;fill:#fff;paint-order:stroke;stroke:#1a2230;stroke-width:8px}
+.leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:0 14px 8px}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#genGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px}
+.gcard{padding:12px;border-radius:12px;background:var(--panel);border:1.5px dashed var(--line);text-align:left;box-shadow:var(--sombra);min-height:64px}
+.gcard b{display:block;font-size:14px;font-weight:650;line-height:1.25}
+.gcard small{color:var(--muted);font-size:12px}
+.gcard.tocada{border:1.5px solid var(--tocada)}.gcard.pend{border:1.5px solid var(--pend)}.gcard.listo{border:1.5px solid var(--listo)}
+.gcard.sel{outline:2.5px solid var(--accent);outline-offset:1px}
+.pista{margin:6px 12px 16px;padding:18px 16px;border-radius:14px;background:var(--panel);border:1.5px dashed var(--line);color:var(--muted);text-align:center;font-size:14px;line-height:1.45}
+.pista b{color:var(--ink);display:block;font-size:15px;margin-bottom:4px}
+.pista .cifras{display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:12.5px}
+.pista .cifras span{display:flex;align-items:center;gap:5px}
+.pista .cifras i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .seccion{color:var(--muted);font-size:13px;padding:14px 14px 4px;font-weight:600}
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none;font-size:15px;background:var(--sin)}
+.av.tocada{background:#c98a3e}.av.pend{background:var(--pend)}.av.listo{background:var(--listo)}
+.badge{background:var(--accent);color:var(--onAccent);border-radius:12px;min-width:21px;height:21px;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 6px}
 
-/* Chat */
-#chat .top{gap:4px;padding-left:4px}
-#chat .av{width:40px;height:40px;font-size:14px}
+/* Conversación del área (debajo del plano) */
+#chat{display:flex;flex-direction:column}
+.barraZona{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:10px;padding:8px 4px 8px 12px;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:0 3px 10px rgba(0,0,0,.10)}
+.barraZona .av{width:40px;height:40px;font-size:14px}
+.barraZona .titulo{flex:1;min-width:0;margin:0}
+.barraZona .titulo b{display:block;font-size:16px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.estBtn{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);padding:2px 0}
+.estBtn i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.estBtn svg{width:14px;height:14px}
+.barraZona .ib{color:var(--muted)}
 .titulo{flex:1;min-width:0;margin-left:6px}
 .titulo b{display:block;font-weight:500;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .titulo small{color:var(--muted);font-size:13px}
-#selTop b{flex:1;font-size:20px;font-weight:500;margin-left:10px}
-#estados{display:flex;gap:8px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line);flex:none}
-#estados button{flex:1;border:1px solid var(--line);border-radius:18px;padding:6px 4px;font-size:13px;color:var(--muted)}
-#estados button.on[data-e=sin]{background:#1d6d8c;color:#fff;border-color:#1d6d8c}
-#estados button.on[data-e=pend]{background:var(--pend);color:#111;border-color:var(--pend)}
-#estados button.on[data-e=listo]{background:#1fa855;color:#fff;border-color:#1fa855}
-#mensajes{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 10px 10px;display:flex;flex-direction:column;
-  background-color:var(--bg);background-image:radial-gradient(#ffffff08 1px,transparent 1px);background-size:22px 22px}
-.dia{align-self:center;background:#182229;color:var(--muted);font-size:12.5px;padding:5px 12px;border-radius:8px;margin:10px 0 6px;text-transform:uppercase}
-.vacioChat{align-self:center;background:#182229;color:#ffd279;font-size:13px;padding:8px 12px;border-radius:8px;margin:14px 10px;text-align:center;max-width:320px}
-.b{max-width:82%;align-self:flex-end;background:var(--out);border-radius:8px 0 8px 8px;padding:6px 8px 5px 9px;margin:3px 0;position:relative;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
-.b.cont{border-radius:8px;margin-top:1px}
-.b.sel::before{content:'';position:absolute;top:-2px;bottom:-2px;left:-100vw;right:-100vw;background:#00a88440;pointer-events:none}
+#selTop{background:var(--accent);color:var(--onAccent)}
+#selTop b{flex:1;font-size:20px;font-weight:600;margin-left:10px}
+#mensajes{flex:1;padding:6px 10px 12px;display:flex;flex-direction:column;background-color:var(--bg);background-image:radial-gradient(var(--patron) 1px,transparent 1px);background-size:22px 22px}
+.dia{align-self:center;background:var(--chip);color:var(--muted);font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;margin:10px 0 6px;text-transform:uppercase;letter-spacing:.03em}
+.vacioChat{align-self:center;background:var(--chip);color:var(--link);font-size:13px;padding:10px 14px;border-radius:10px;margin:14px 10px;text-align:center;max-width:320px}
+.b{max-width:82%;align-self:flex-end;background:var(--out);color:var(--outInk);border-radius:10px 2px 10px 10px;padding:6px 8px 5px 9px;margin:3px 0;position:relative;box-shadow:var(--sombra);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.b.cont{border-radius:10px;margin-top:1px}
+.b.sel::before{content:'';position:absolute;top:-2px;bottom:-2px;left:-100vw;right:-100vw;background:rgba(224,163,92,.25);pointer-events:none}
 .b.flash{animation:flash 1.3s}
-@keyframes flash{0%,60%{filter:brightness(1.7)}}
+@keyframes flash{0%,60%{filter:brightness(1.25) saturate(1.3)}}
 .b img,.b video{-webkit-user-drag:none;pointer-events:none}
 .b .t{white-space:pre-wrap;word-wrap:break-word}
-.reenv{font-size:12px;color:#ffffff99;font-style:italic;display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.reenv{font-size:12px;color:var(--outMeta);font-style:italic;display:flex;align-items:center;gap:4px;margin-bottom:2px}
 .reenv svg{width:14px;height:14px}
-.cita{display:flex;background:#0000002e;border-radius:6px;overflow:hidden;margin:0 -3px 4px -4px;min-width:150px}
-.cita::before{content:'';width:4px;background:#53bdeb;flex:none}
+.cita{display:flex;background:var(--citaBg);border-radius:6px;overflow:hidden;margin:0 -3px 4px -4px;min-width:150px}
+.cita::before{content:'';width:4px;background:var(--accent);flex:none}
 .cita div{flex:1;min-width:0;padding:5px 8px}
-.cita b{display:block;font-size:13px;color:#53bdeb;font-weight:600}
-.cita span{display:block;font-size:13.5px;color:#ffffffb3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cita b{display:block;font-size:13px;color:var(--accent);font-weight:650}
+.cita span{display:block;font-size:13.5px;color:var(--outInk);opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cita img{width:46px;height:46px;object-fit:cover;flex:none}
-.hora{float:right;font-size:11px;color:#ffffff99;margin:7px 0 -5px 10px;display:flex;align-items:center;gap:3px;white-space:nowrap}
+.hora{float:right;font-size:11px;color:var(--outMeta);margin:7px 0 -5px 10px;display:flex;align-items:center;gap:3px;white-space:nowrap}
 .hora svg{width:16px;height:16px;stroke-width:2.2}
-.hora .ok{color:#53bdeb;display:flex}
+.hora .ok{color:var(--accent);display:flex}
 .hora .st svg{width:11px;height:11px;fill:currentColor;stroke:none}
 .b.media{padding:3px}
 .b.media .cita,.b.media .reenv{margin:3px 3px 4px}
 .b.media .marco{position:relative}
-.b.media .img{display:block;width:min(260px,68vw);min-height:120px;max-height:360px;object-fit:cover;border-radius:6px;background:#0d3a33}
+.b.media .img{display:block;width:min(260px,68vw);min-height:120px;max-height:360px;object-fit:cover;border-radius:8px;background:var(--chip)}
 .b.media .marco .hora{position:absolute;right:6px;bottom:4px;margin:0;color:#fff;text-shadow:0 0 4px #000}
+.b.media .marco .hora .ok{color:#ffd29a}
 .b.media .pie{padding:5px 5px 2px 6px;max-width:min(260px,68vw)}
 .b.media .play{position:absolute;inset:0;display:grid;place-items:center}
 .b.media .play span{width:54px;height:54px;border-radius:50%;background:#0009;display:grid;place-items:center}
 .b.media .play svg{fill:#fff;stroke:none;width:26px;height:26px;margin-left:3px}
 .aud{display:flex;align-items:center;gap:10px;width:min(250px,64vw);padding:2px 0}
 .aud .pb{width:36px;height:36px;display:grid;place-items:center;flex:none}
-.aud .pb svg{fill:var(--ink);stroke:none;width:26px;height:26px}
-.aud .barra{flex:1;height:4px;border-radius:2px;background:#ffffff40;position:relative}
-.aud .barra i{position:absolute;left:0;top:0;bottom:0;background:#53bdeb;border-radius:2px;width:0}
-.aud .barra b{position:absolute;top:-5px;width:13px;height:13px;border-radius:50%;background:#53bdeb;left:-6px}
-.aud .mic{width:40px;height:40px;border-radius:50%;background:#2a3942;display:grid;place-items:center;flex:none;color:#53bdeb}
+.aud .pb svg{fill:var(--outInk);stroke:none;width:26px;height:26px}
+.aud .barra{flex:1;height:4px;border-radius:2px;background:rgba(127,127,127,.35);position:relative}
+.aud .barra i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px;width:0}
+.aud .barra b{position:absolute;top:-5px;width:13px;height:13px;border-radius:50%;background:var(--accent);left:-6px}
+.aud .mic{width:40px;height:40px;border-radius:50%;background:var(--chip);display:grid;place-items:center;flex:none;color:var(--accent)}
 .aud .mic svg{width:20px;height:20px}
-.aud-pie{display:flex;justify-content:space-between;font-size:11px;color:#ffffff99;margin:2px 0 0 46px}
+.aud-pie{display:flex;justify-content:space-between;font-size:11px;color:var(--outMeta);margin:2px 0 0 46px}
 
 /* Composer */
-#contexto{display:flex;align-items:center;gap:8px;margin:0 62px 0 6px;background:var(--head);border-radius:14px 14px 0 0;padding:7px 4px 4px 7px;flex:none}
-#contexto .cita{flex:1;margin:0;background:#0b141a99;min-width:0}
+#contexto{display:flex;align-items:center;gap:8px;margin:0 62px 0 6px;background:var(--campo);border:1px solid var(--line);border-bottom:0;border-radius:14px 14px 0 0;padding:7px 4px 4px 7px;flex:none}
+#contexto .cita{flex:1;margin:0;background:var(--citaBg);min-width:0}
+#contexto .cita span{color:var(--ink)}
 #contexto .ib{width:34px;height:34px;color:var(--muted)}
 #contexto:not([hidden]) + #composer .caja{border-radius:0 0 22px 22px}
-#composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex:none}
-#contexto:not([hidden]) + #composer{padding-top:0}
-.caja{flex:1;display:flex;align-items:flex-end;background:var(--head);border-radius:25px;min-height:50px;padding:0 4px 0 16px}
+#composer{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex:none;background:var(--bg);border-top:1px solid var(--line)}
+#contexto:not([hidden]) + #composer{padding-top:0;border-top:0}
+.caja{flex:1;display:flex;align-items:flex-end;background:var(--campo);border:1px solid var(--line);border-radius:25px;min-height:50px;padding:0 4px 0 16px}
 .caja textarea{flex:1;background:none;border:0;resize:none;max-height:130px;padding:13px 0;outline:none;line-height:1.35;height:48px}
 .caja .ib{color:var(--muted);height:48px;width:44px}
-.redondo{width:50px;height:50px;border-radius:50%;background:var(--accent);color:#0b141a;display:grid;place-items:center;flex:none}
-.redondo:active{filter:brightness(1.15)}
-#grabando{flex:1;display:flex;align-items:center;gap:12px;background:var(--head);border-radius:25px;min-height:50px;padding:0 8px 0 6px}
+.redondo{width:50px;height:50px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:grid;place-items:center;flex:none;box-shadow:0 2px 6px rgba(192,104,24,.35)}
+.redondo:active{filter:brightness(1.1)}
+#grabando{flex:1;display:flex;align-items:center;gap:12px;background:var(--campo);border:1px solid var(--line);border-radius:25px;min-height:50px;padding:0 8px 0 6px}
 #grabando .punto{width:11px;height:11px;border-radius:50%;background:var(--danger);animation:late 1s infinite}
 #grabando .tiempo{font-variant-numeric:tabular-nums;font-size:17px}
 #grabando .msg{flex:1;color:var(--muted);font-size:14px}
@@ -151,12 +193,12 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #disparo:active{background:#fff}
 #camUltima{width:54px;height:54px;border-radius:10px;position:relative;background:#222;border:2px solid #fff}
 #camUltima img{width:100%;height:100%;object-fit:cover;border-radius:8px}
-#camUltima span{position:absolute;top:-9px;right:-9px;background:var(--accent);color:#0b141a;border-radius:11px;min-width:22px;height:22px;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 5px}
-#camListo{width:54px;height:54px;border-radius:50%;background:var(--accent);color:#0b141a;display:grid;place-items:center}
+#camUltima span{position:absolute;top:-9px;right:-9px;background:var(--accent);color:var(--onAccent);border-radius:11px;min-width:22px;height:22px;font-size:12px;font-weight:700;display:grid;place-items:center;padding:0 5px}
+#camListo{width:54px;height:54px;border-radius:50%;background:var(--accent);color:var(--onAccent);display:grid;place-items:center}
 #camFlash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
 
 /* Editor de fotos */
-#editor{position:fixed;inset:0;background:#000;z-index:31;display:flex;flex-direction:column;touch-action:none;user-select:none;-webkit-user-select:none}
+#editor{color:#f2f0ec;position:fixed;inset:0;background:#000;z-index:31;display:flex;flex-direction:column;touch-action:none;user-select:none;-webkit-user-select:none}
 .topEd{display:flex;align-items:center;gap:2px;padding:calc(6px + env(safe-area-inset-top)) 6px 6px;flex:none}
 .topEd .ib{color:#fff}
 .topEd .ib.on{background:#ffffff33}
@@ -187,27 +229,28 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 #todasPie{padding:2px 14px 0;flex:none}
 #todasPie button{font-size:13px;color:#53bdeb;padding:4px 0}
 #pieEd{display:flex;align-items:flex-end;gap:6px;padding:6px 6px calc(8px + env(safe-area-inset-bottom));flex:none}
-#pieEd .caja{background:#1f2c33}
+#pieEd .caja{background:#1c2843;border-color:#2c3a5c}
+#editor textarea{color:#f2f0ec}
 #escribir{position:absolute;inset:0;background:#000c;z-index:5;display:flex;flex-direction:column}
 #escribir textarea{flex:1;background:none;border:0;outline:none;text-align:center;font:800 32px/1.2 system-ui,Roboto,sans-serif;resize:none;padding:28vh 50px 0 20px;width:100%}
 .gridSt{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:4px 12px 12px}
 .gridSt button{font-size:32px;padding:6px 0;border-radius:10px}
-.gridSt button:active{background:#ffffff14}
+.gridSt button:active{background:var(--toque)}
 .gridEt{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 14px}
 .gridEt button{padding:9px 14px;border-radius:10px;color:#fff;font-weight:700}
 #visor .ib.on{background:#ffffff33}
 
 /* Plan de culminación */
-.planCab{margin:12px;padding:14px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.planCab{margin:12px;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--sombra)}
 .planCab h2{margin:0;font-size:18px}
 .planCab .sub{color:var(--muted);font-size:13px;margin-top:4px}
-.prog{height:6px;border-radius:3px;background:#2a3942;margin-top:10px;overflow:hidden}
+.prog{height:6px;border-radius:3px;background:var(--chip);margin-top:10px;overflow:hidden}
 .prog i{display:block;height:100%;background:var(--accent)}
 .segm{display:flex;margin:4px 12px 8px;background:var(--panel);border-radius:10px;padding:3px;border:1px solid var(--line)}
 .segm button{flex:1;padding:9px 0;border-radius:8px;font-size:14px;color:var(--muted)}
-.segm button.on{background:var(--head);color:var(--ink);font-weight:600}
-details.blq{margin:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-details.blq.sub{margin:0;border:0;border-top:1px solid var(--line);border-radius:0;background:#0d171d}
+.segm button.on{background:var(--chip);color:var(--ink);font-weight:650}
+details.blq{margin:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--sombra)}
+details.blq.sub{margin:0;border:0;border-top:1px solid var(--line);border-radius:0;background:var(--panel2);box-shadow:none}
 details.blq>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:12px 12px 12px 14px;cursor:pointer}
 details.blq>summary::-webkit-details-marker{display:none}
 details.blq.sub>summary{padding-left:18px}
@@ -217,18 +260,18 @@ summary .st small{color:var(--muted);font-size:12.5px;display:block;white-space:
 summary .flecha{color:var(--muted);transition:transform .15s;display:grid}
 summary .flecha svg{width:20px;height:20px}
 details[open]>summary .flecha{transform:rotate(90deg)}
-.hoyChip{background:var(--accent);color:#0b141a;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;vertical-align:1px}
+.hoyChip{background:var(--accent);color:var(--onAccent);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;vertical-align:1px}
 .pdn{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--muted)}
 .pd{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
-.pd.alta{background:#f15c6d}.pd.media{background:var(--pend)}.pd.baja{background:#8696a0}
+.pd.alta{background:var(--danger)}.pd.media{background:var(--hl)}.pd.baja{background:var(--sin)}
 .pbody{padding:2px 14px 12px;font-size:14px}
 .pbody p{margin:8px 0}
-.pbody .aviso{color:#ffd279}
+.pbody .aviso{color:var(--link)}
 .pbody .res{color:var(--muted)}
 .pact{display:flex;gap:10px;padding:10px 12px 10px 14px;border-top:1px solid var(--line);align-items:flex-start;cursor:pointer}
 .pact .chk{width:26px;height:26px;border-radius:7px;border:2px solid var(--muted);flex:none;display:grid;place-items:center;margin-top:1px}
 .pact .chk svg{width:18px;height:18px;stroke-width:3}
-.pact .chk.on{background:var(--accent);border-color:var(--accent);color:#0b141a}
+.pact .chk.on{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}
 .pact .cuerpo{flex:1;min-width:0}
 .pact .t{font-size:15px;line-height:1.3}
 .pact.hecha .t{text-decoration:line-through;color:var(--muted)}
@@ -238,70 +281,55 @@ details[open]>summary .flecha{transform:rotate(90deg)}
 .pact.abierta .pdet{display:block}
 .pdet .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:9px}
 .minis{display:flex;gap:6px;margin-top:9px;overflow-x:auto}
-.minis img{width:86px;height:86px;object-fit:cover;border-radius:8px;flex:none;background:#2a3942}
+.minis img{width:86px;height:86px;object-fit:cover;border-radius:8px;flex:none;background:var(--chip)}
 .accPer{display:flex;gap:8px;padding:4px 14px 12px}
-.btnAcc{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 6px;border-radius:22px;background:var(--head);border:1px solid var(--line);font-weight:600;font-size:14px}
+.btnAcc{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 6px;border-radius:22px;background:var(--chip);border:1px solid var(--line);font-weight:600;font-size:14px}
 .btnAcc.verde{background:#25d366;border-color:#25d366;color:#0b141a}
 .btnAcc svg{width:18px;height:18px}
 
 /* Hoja inferior, visor, toast */
 #fondo{position:fixed;inset:0;background:#0008;z-index:34}
-#hoja{position:fixed;left:0;right:0;bottom:0;background:var(--head);border-radius:18px 18px 0 0;z-index:35;padding:8px 0 calc(12px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;animation:sube .18s ease-out}
+#hoja{position:fixed;left:0;right:0;bottom:0;background:var(--panel);color:var(--ink);box-shadow:0 -4px 20px rgba(0,0,0,.25);border-radius:18px 18px 0 0;z-index:35;padding:8px 0 calc(12px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;animation:sube .18s ease-out}
 @keyframes sube{from{transform:translateY(40px);opacity:.4}}
-#hoja .tira{width:36px;height:4px;border-radius:2px;background:#ffffff33;margin:4px auto 10px}
+#hoja .tira{width:36px;height:4px;border-radius:2px;background:rgba(127,127,127,.35);margin:4px auto 10px}
 #hoja h3{margin:4px 20px 10px;font-size:16px}
 #hoja p{margin:0 20px 12px;color:var(--muted);font-size:14px}
 .op{display:flex;align-items:center;gap:18px;width:100%;padding:14px 22px;text-align:left;font-size:16px}
-.op:active{background:#ffffff0d}
+.op:active{background:var(--toque)}
 .op svg{color:var(--muted)}
 .op.rojo,.op.rojo svg{color:var(--danger)}
 .op small{display:block;color:var(--muted);font-size:13px}
-.op .mini{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none;background:#2a3942;display:grid;place-items:center}
+.op .mini{width:44px;height:44px;border-radius:6px;object-fit:cover;flex:none;background:var(--chip);display:grid;place-items:center}
 .op .cuerpo{flex:1;min-width:0}
 .op .cuerpo span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gridOps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:6px 14px 10px}
 .gridOps button{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:8px 0}
 .gridOps span{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;color:#fff}
-#visor{position:fixed;inset:0;background:#000;z-index:30;display:flex;flex-direction:column}
+#visor{color:#f2f0ec;position:fixed;inset:0;background:#000;z-index:30;display:flex;flex-direction:column}
 #visor .top{background:#000a}
 #visor .medio{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #visor img,#visor video{max-width:100%;max-height:100%}
 #vPie{padding:10px 16px calc(14px + env(safe-area-inset-bottom));text-align:center;white-space:pre-wrap;background:#000a}
-#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#e9edef;color:#111b21;padding:10px 16px;border-radius:22px;font-size:14px;z-index:40;max-width:90vw;text-align:center;box-shadow:0 4px 18px #0006}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:22px;font-size:14px;z-index:40;max-width:90vw;text-align:center;box-shadow:0 4px 18px #0006}
 </style>
 </head>
 <body>
 
 <!-- Candado: los planos vienen cifrados -->
 <section id="candado" class="pantalla">
-  <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div>
+  <svg class="logo" viewBox="13 7 38 49" aria-hidden="true"><defs><clipPath id="cieloC"><rect x="15" y="14" width="34" height="19.5"/></clipPath><linearGradient id="solC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0a35c"/><stop offset="1" stop-color="#c06818"/></linearGradient></defs><rect x="15" y="14" width="34" height="40" rx="5" fill="#f4f2ed"/><circle cx="32" cy="33.5" r="10" fill="url(#solC)" clip-path="url(#cieloC)"/><rect x="19" y="32" width="26" height="3.2" rx="1.6" fill="#1a2230"/><rect x="19" y="39.5" width="19" height="3" rx="1.5" fill="#1a2230" opacity=".45"/><rect x="19" y="45.5" width="12" height="3" rx="1.5" fill="#1a2230" opacity=".45"/><rect x="20.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/><rect x="27.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/><rect x="34.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/><rect x="41.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/></svg>
+  <div class="marcaTxt">MiLibroDeObra</div>
   <h2 style="margin:0">Recorrido de obra</h2>
   <p>Escribe la clave para abrir los planos. Solo se pide la primera vez en este teléfono.</p>
   <input id="clave" type="password" placeholder="Clave" autocomplete="current-password">
   <button id="btnAbrir" class="boton">Abrir</button>
-  <p id="errClave" style="color:var(--danger)"></p>
+  <p id="errClave" style="color:#ef6b5f"></p>
 </section>
 
-<!-- Inicio: plano + lista de áreas -->
+<!-- Inicio: el plano arriba y, al tocar un área, su conversación debajo (el plano se esconde al deslizar) -->
 <section id="inicio" class="pantalla" hidden>
-  <header class="top"><h1 id="titulo">Recorrido</h1>
+  <header class="top" id="topMarca"><svg class="marca" viewBox="13 7 38 49" aria-hidden="true"><defs><clipPath id="cieloH"><rect x="15" y="14" width="34" height="19.5"/></clipPath><linearGradient id="solH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0a35c"/><stop offset="1" stop-color="#c06818"/></linearGradient></defs><rect x="15" y="14" width="34" height="40" rx="5" fill="#f4f2ed"/><circle cx="32" cy="33.5" r="10" fill="url(#solH)" clip-path="url(#cieloH)"/><rect x="19" y="32" width="26" height="3.2" rx="1.6" fill="#1a2230"/><rect x="19" y="39.5" width="19" height="3" rx="1.5" fill="#1a2230" opacity=".45"/><rect x="19" y="45.5" width="12" height="3" rx="1.5" fill="#1a2230" opacity=".45"/><rect x="20.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/><rect x="27.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/><rect x="34.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/><rect x="41.5" y="9" width="3" height="9" rx="1.5" fill="#e0a35c"/></svg><h1><small>MiLibroDeObra</small><span id="titulo">Recorrido</span></h1>
     <button class="ib" id="btnMenu" aria-label="Menú"></button></header>
-  <nav class="tabs" id="tabs"></nav>
-  <div class="scroll" id="scrollInicio">
-    <div id="planoWrap"></div>
-    <div class="leyenda" id="leyenda"></div>
-    <div id="lista"></div>
-  </div>
-</section>
-
-<!-- Chat de un área -->
-<section id="chat" class="pantalla" hidden>
-  <header class="top" id="chatTop">
-    <button class="ib" id="btnAtras" aria-label="Atrás"></button>
-    <div class="av" id="chatAv"></div>
-    <div class="titulo"><b id="chatNombre"></b><small id="chatSub"></small></div>
-    <button class="ib" id="btnChatMenu" aria-label="Opciones"></button>
-  </header>
   <header class="top" id="selTop" hidden>
     <button class="ib" id="sCerrar" aria-label="Cancelar selección"></button>
     <b id="sCuenta">1</b>
@@ -311,10 +339,22 @@ details[open]>summary .flecha{transform:rotate(90deg)}
     <button class="ib" id="sFwd" aria-label="Reenviar"></button>
     <button class="ib" id="sMas" aria-label="Más"></button>
   </header>
-  <div id="estados"></div>
-  <div id="mensajes"></div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="scroll" id="scrollInicio">
+    <div id="zonaPlano"><div id="planoWrap"></div><div class="leyenda" id="leyenda"></div><div id="genGrid" hidden></div></div>
+    <div id="lista"></div>
+    <div id="chat" hidden>
+      <div class="barraZona" id="chatTop">
+        <div class="av" id="chatAv"></div>
+        <div class="titulo"><b id="chatNombre"></b><button class="estBtn" id="chatSub" aria-label="Cambiar estado"></button></div>
+        <button class="ib" id="btnChatMenu" aria-label="Opciones"></button>
+        <button class="ib" id="btnCerrarZona" aria-label="Volver al plano"></button>
+      </div>
+      <div id="mensajes"></div>
+    </div>
+  </div>
   <div id="contexto" hidden></div>
-  <footer id="composer">
+  <footer id="composer" hidden>
     <div class="caja" id="caja">
       <textarea id="texto" rows="1" placeholder="Mensaje"></textarea>
       <button class="ib" id="btnClip" aria-label="Adjuntar"></button>
@@ -402,6 +442,7 @@ const IC = {
   girar:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
   deshacer:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
   chev:'<polyline points="9 18 15 12 9 6"/>',
+  sol:'<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
   lista:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
 };
 const ic = (n, extra='') => `<svg class="i" viewBox="0 0 24 24" ${extra}>${IC[n]}</svg>`;
@@ -527,23 +568,32 @@ function pintarTabs(){
   const ts = [...P.niveles.map(n => [n.id, n.corto || n.nombre]), ['gen','Generales'], ...(P.plan ? [['plan','Acciones']] : [])];
   if (tab === 'plan' && !P.plan) tab = P.niveles[0].id;
   $('#tabs').innerHTML = ts.map(([k,n]) => `<button data-k="${k}" class="${k===tab?'on':''}">${esc(n)}</button>`).join('');
-  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { tab = b.dataset.k; pintarInicio(); $('#scrollInicio').scrollTop = 0; });
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { tab = b.dataset.k; if (!$('#chat').hidden) history.back(); else pintarInicio(); $('#scrollInicio').scrollTop = 0; });
 }
 function pintarPlano(){
-  const w = $('#planoWrap');
-  if (tab==='gen' || tab==='plan'){ w.hidden = true; $('#leyenda').hidden = true; return; }
-  w.hidden = false; $('#leyenda').hidden = false;
-  const p = P.niveles.find(n => n.id===tab), W = p.w, H = p.h, fs = W*0.026;
+  const w = $('#planoWrap'), g = $('#genGrid');
+  $('#zonaPlano').hidden = tab === 'plan';
+  if (tab === 'plan') return;
+  if (tab === 'gen'){
+    w.hidden = true; $('#leyenda').hidden = true; g.hidden = false;
+    g.innerHTML = Object.values(AREAS).filter(a => a.nivel === 'gen').map(a => { const n = RES[a.id].n;
+      return `<button class="gcard ${claseDe(a.id)}${a.id === abierta ? ' sel' : ''}" data-id="${a.id}"><b>${esc(a.nombre)}</b><small>${n ? n + ' mensaje' + (n !== 1 ? 's' : '') : 'Sin registros'}</small></button>`; }).join('');
+    g.querySelectorAll('.gcard').forEach(b => b.onclick = () => abrirChat(b.dataset.id));
+    return;
+  }
+  g.hidden = true; w.hidden = false; $('#leyenda').hidden = false;
+  const p = P.niveles.find(n => n.id === tab), W = p.w, H = p.h, fs = W*0.026, sx = w.scrollLeft;
   let s = `<svg viewBox="0 0 ${W} ${H}">`;
   for (const a of p.areas){
-    const id = tab+'-'+a.id, pts = ptsDe(a).map(([x,y]) => [x*W/100, y*H/100]), n = RES[id].n;
-    const cx = pts.reduce((t,q)=>t+q[0],0)/pts.length, cy = pts.reduce((t,q)=>t+q[1],0)/pts.length;
-    s += `<g class="area ${claseDe(id)}" data-id="${id}"><polygon points="${pts.map(q=>q.join(',')).join(' ')}"/>${n?`<text x="${cx}" y="${cy+fs*0.35}" text-anchor="middle" font-size="${fs}">${n}</text>`:''}</g>`;
+    const id = tab + '-' + a.id, pts = ptsDe(a).map(([x, y]) => [x*W/100, y*H/100]), n = RES[id].n;
+    const cx = pts.reduce((t, q) => t + q[0], 0)/pts.length, cy = pts.reduce((t, q) => t + q[1], 0)/pts.length;
+    s += `<g class="area ${claseDe(id)}${id === abierta ? ' sel' : ''}" data-id="${id}"><polygon points="${pts.map(q => q.join(',')).join(' ')}"/>${n ? `<text x="${cx}" y="${cy + fs*0.35}" text-anchor="middle" font-size="${fs}">${n}</text>` : ''}</g>`;
   }
   const ancho = Math.round(Math.min(1100, Math.max(640, 330*W/H)));
   w.innerHTML = `<div class="lienzo" style="width:max(100%, ${ancho}px)"><img src="${p.img}" alt="">${s}</svg></div>`;
+  w.scrollLeft = sx;
   w.querySelectorAll('g.area').forEach(g => g.onclick = () => abrirChat(g.dataset.id));
-  $('#leyenda').innerHTML = `<span style="width:100%">Desliza el plano a los lados para ver toda la planta.</span><span><i style="border:1.5px dashed var(--sin)"></i>Sin revisar</span><span><i style="background:var(--sin)"></i>Con registros</span><span><i style="background:var(--pend)"></i>Pendientes</span><span><i style="background:var(--listo)"></i>Listo</span>`;
+  $('#leyenda').innerHTML = `<span><i style="border:1.5px dashed var(--sin)"></i>Sin revisar</span><span><i style="background:var(--tocada)"></i>Con registros</span><span><i style="background:var(--pend)"></i>Pendientes</span><span><i style="background:var(--listo)"></i>Listo</span><span>· desliza el plano ↔</span>`;
 }
 function prevTxt(u){
   if (!u) return '<span style="opacity:.7">Toca para empezar</span>';
@@ -560,10 +610,12 @@ function filaHTML(a){
     <div class="l2"><span class="prev">${prevTxt(r.ultimo)}</span>${r.nuevos?`<span class="badge">${r.nuevos}</span>`:''}</div></div></button>`;
 }
 function pintarLista(){
+  const L = $('#lista');
   if (tab === 'plan') return pintarPlan();
-  const lista = Object.values(AREAS).filter(a => a.nivel===tab);
-  $('#lista').innerHTML = `<div class="seccion">${tab==='gen'?'Lo que no cae en un cuarto':'Áreas · toca una en el plano o en la lista'}</div>` + lista.map(filaHTML).join('');
-  $('#lista').querySelectorAll('.fila').forEach(b => b.onclick = () => abrirChat(b.dataset.id));
+  if (abierta){ L.innerHTML = ''; return; }
+  const ids = Object.values(AREAS).filter(a => a.nivel === tab).map(a => a.id), cuenta = k => ids.filter(id => claseDe(id) === k).length;
+  L.innerHTML = `<div class="pista"><b>Toca ${tab === 'gen' ? 'un tema' : 'un área del plano'} para abrir su conversación</b>Ahí van las fotos, los audios y las notas de ese lugar.
+    <div class="cifras"><span><i style="background:var(--tocada)"></i>${cuenta('tocada')} con registros</span><span><i style="background:var(--pend)"></i>${cuenta('pend')} pendientes</span><span><i style="background:var(--listo)"></i>${cuenta('listo')} listas</span></div></div>`;
 }
 function pintarInicio(){ pintarTabs(); pintarPlano(); pintarLista(); }
 
@@ -575,22 +627,39 @@ async function abrirChat(id){
   if ($('#chat').hidden) history.pushState({v:'chat'}, '');
   if (abierta && abierta !== id){ pararAudio(); limpiarSel(); quitarContexto(); }
   abierta = id;
-  $('#inicio').hidden = true; $('#chat').hidden = false;
-  pintarCabecera(); await pintarMensajes(true);
+  if (AREAS[id].nivel !== tab){ tab = AREAS[id].nivel; pintarTabs(); }
+  $('#chat').hidden = false; $('#composer').hidden = false;
+  pintarPlano(); pintarLista(); pintarCabecera(); await pintarMensajes(true, true);
 }
 function cerrarChat(){
   if (rec) descartarGrab();
   pararAudio(); limpiarSel(); quitarContexto(); abierta = null; soltarUrls();
-  $('#chat').hidden = true; $('#inicio').hidden = false; pintarInicio();
+  $('#chat').hidden = true; $('#composer').hidden = true; $('#mensajes').innerHTML = '';
+  pintarInicio(); $('#scrollInicio').scrollTo({top: 0, behavior: 'smooth'});
+}
+// "Estamos en la Sala", "en el Baño principal", "en los Depósitos"…
+function articulo(n){
+  const w = n.trim().split(/\s+/)[0].toLowerCase();
+  if (['área', 'agua'].includes(w)) return 'el';
+  if (['instalaciones', 'fachadas'].includes(w)) return 'las';
+  if (['baño','balcón','pasillo','comedor','recibo','sanitario','vestier','cuarto','depósito','estacionamiento','family','lavandero','gimnasio','caney','muelle','techo','servidor','jacuzzi','closet','tanque','patio','jardín'].includes(w)) return 'el';
+  if (w.endsWith('as')) return 'las';
+  if (w.endsWith('os') || w.endsWith('es')) return 'los';
+  return 'la';
 }
 function pintarCabecera(){
-  const a = AREAS[abierta], c = claseDe(abierta), e = ESTADOS[abierta]||'sin';
+  const a = AREAS[abierta], c = claseDe(abierta), e = ESTADOS[abierta] || 'sin', n = (RES[abierta] || {}).n || 0;
   $('#chatAv').className = 'av ' + c; $('#chatAv').textContent = iniciales(a.nombre);
-  $('#chatNombre').textContent = a.nombre;
-  $('#chatSub').textContent = NIVELES[a.nivel] + ' · ' + {sin:'sin revisar', pend:'con pendientes', listo:'listo para entregar'}[e];
-  $('#estados').innerHTML = [['sin','Sin revisar'],['pend','Pendientes'],['listo','Listo']].map(([k,n]) => `<button data-e="${k}" class="${e===k?'on':''}">${n}</button>`).join('');
-  $('#estados').querySelectorAll('button').forEach(b => b.onclick = async () => { ESTADOS[abierta] = b.dataset.e; await kvSet('estados', ESTADOS); pintarCabecera(); });
+  $('#chatNombre').textContent = `Estamos en ${articulo(a.nombre)} ${a.nombre}`;
+  const col = {sin:'var(--sin)', pend:'var(--pend)', listo:'var(--listo)'}[e];
+  $('#chatSub').innerHTML = `${esc(NIVELES[a.nivel])} · <i style="background:${col}"></i>${{sin:'Sin revisar', pend:'Con pendientes', listo:'Listo'}[e]} · ${n} mensaje${n !== 1 ? 's' : ''} ${ic('chev', 'style="transform:rotate(90deg)"')}`;
 }
+$('#chatSub').onclick = () => {
+  const e = ESTADOS[abierta] || 'sin';
+  hoja(`<h3>Estado de ${esc(AREAS[abierta].nombre)}</h3>` + [['sin','Sin revisar','var(--sin)'], ['pend','Con pendientes','var(--pend)'], ['listo','Listo para entregar','var(--listo)']]
+    .map(([k, t, c]) => `<button class="op" data-e="${k}"><span style="width:14px;height:14px;border-radius:50%;background:${c};flex:none"></span><div>${t}${k === e ? '<small>Estado actual</small>' : ''}</div></button>`).join(''),
+    h => h.querySelectorAll('[data-e]').forEach(b => b.onclick = async () => { ESTADOS[abierta] = b.dataset.e; await kvSet('estados', ESTADOS); cerrarHoja(); pintarCabecera(); pintarPlano(); }));
+};
 const ticks = m => (m.exportado && !m.meta) ? `<span class="ok">${ic('doble')}</span>` : ic('check');
 const horaHTML = m => `<span class="hora">${m.destacado?`<span class="st">${ic('estrella')}</span>`:''}${m.editado?'Editado ':''}${hora(m.fecha)} ${ticks(m)}</span>`;
 
@@ -612,10 +681,10 @@ function burbuja(m, cont){
   if (m.tipo==='audio') return `<div class="${cl}" data-id="${m.id}">${pre}<div class="aud"><button class="pb" data-play="${m.id}"><svg class="i" viewBox="0 0 24 24">${IC.play}</svg></button><div class="barra"><i></i><b></b></div><div class="mic">${ic('mic')}</div></div><div class="aud-pie"><span class="dur">${mmss(m.dur)}</span>${h}</div></div>`;
   return '';
 }
-async function pintarMensajes(alFinal){
+async function pintarMensajes(alFinal, suave){
   soltarUrls();
   MSGS = (await msgsDe(abierta)).sort((a,b) => a.fecha.localeCompare(b.fecha));
-  const c = $('#mensajes'), arriba = c.scrollTop; let html = '', dia = '', prev = null;
+  const c = $('#mensajes'), sc = $('#scrollInicio'), arriba = sc.scrollTop; let html = '', dia = '', prev = null;
   if (!MSGS.length) html = `<div class="vacioChat">Manda aquí fotos, audios y notas de ${esc(AREAS[abierta].nombre)}. Todo queda guardado en este teléfono, aunque no haya señal.</div>`;
   for (const m of MSGS){
     const d = new Date(m.fecha).toDateString();
@@ -623,9 +692,10 @@ async function pintarMensajes(alFinal){
     const cont = prev && (new Date(m.fecha) - new Date(prev.fecha) < 120000);
     html += burbuja(m, cont); prev = m;
   }
+  $('#chat').style.minHeight = sc.clientHeight + 'px';   // así el plano siempre puede esconderse arriba
   c.innerHTML = html;
   c.querySelectorAll('.b').forEach(conectarBurbuja);
-  if (alFinal) requestAnimationFrame(() => c.scrollTop = c.scrollHeight); else c.scrollTop = arriba;
+  if (alFinal) requestAnimationFrame(() => sc.scrollTo({top: sc.scrollHeight, behavior: suave ? 'smooth' : 'auto'})); else sc.scrollTop = arriba;
 }
 function conectarBurbuja(el){
   const m = MSGS.find(x => x.id === el.dataset.id); if (!m) return;
@@ -668,7 +738,7 @@ function alternarSel(id){
 }
 function limpiarSel(){ selec.clear(); document.querySelectorAll('.b.sel').forEach(b => b.classList.remove('sel')); pintarSel(); }
 function pintarSel(){
-  const n = selec.size; $('#selTop').hidden = !n; $('#chatTop').hidden = !!n;
+  const n = selec.size; $('#selTop').hidden = !n; $('#topMarca').hidden = !!n;
   if (!n) return;
   $('#sCuenta').textContent = n; $('#sResp').hidden = n !== 1;
   const todos = elegidos().every(m => m.destacado);
@@ -756,7 +826,7 @@ async function agregar(area, tipo, datos){
   if (respondiendo && abierta === area){ m.resp = {id:respondiendo.id, tipo:respondiendo.tipo, texto:respondiendo.texto||null, dur:respondiendo.dur||null}; respondiendo = null; pintarContexto(); }
   await msgPut(m);
   const r = RES[area]; r.n++; r.nuevos++; r.ultimo = {tipo, texto:m.texto, dur:m.dur, fecha:m.fecha};
-  if (abierta === area){ pintarCabecera(); await pintarMensajes(true); }
+  if (abierta === area){ pintarCabecera(); pintarPlano(); await pintarMensajes(true); }
   return m;
 }
 async function miniatura(blob, max=520){
@@ -881,7 +951,7 @@ $('#vStar').onclick = async () => { const m = visorMsg; m.destacado = !m.destaca
 $('#vBorrar').onclick = async () => { const m = visorMsg; if (!confirm('¿Borrar este mensaje?')) return; await borrarUno(m); history.back(); await recalcular(); await pintarMensajes(false); pintarCabecera(); };
 
 // ---------- Botón atrás de Android ----------
-$('#btnAtras').onclick = () => history.back();
+$('#btnCerrarZona').onclick = () => history.back();
 window.addEventListener('popstate', () => {
   if (saltarPop){ saltarPop = false; return; }
   if (!$('#hoja').hidden){ cerrarHoja(); if (!$('#chat').hidden) history.pushState({v:'chat'}, ''); return; }
@@ -904,11 +974,13 @@ $('#btnMenu').onclick = async () => {
     <button class="op" data-a="todo">${ic('disco')}<div>Todo otra vez<small>${todos.length} mensaje(s)</small></div></button>
     <div class="seccion">${uso}</div>
     <button class="op" data-a="comprimir">${ic('imagen')}<div>Comprimir fotos guardadas<small>Libera espacio: deja las fotos como las manda WhatsApp</small></div></button>
+    <button class="op" data-a="tema">${ic('sol')}<div>Tema: ${{auto:'automático', claro:'claro', oscuro:'oscuro'}[temaActual()]}<small>Toca para cambiar: automático (como el teléfono), claro u oscuro</small></div></button>
     <button class="op" data-a="candado">${ic('candado')}<div>Bloquear<small>Vuelve a pedir la clave (no borra nada)</small></div></button>`, h => {
     h.querySelector('[data-a=star]').onclick = () => verDestacados(todos);
     h.querySelector('[data-a=nuevo]').onclick = () => exportar(false);
     h.querySelector('[data-a=todo]').onclick = () => exportar(true);
     h.querySelector('[data-a=comprimir]').onclick = comprimirTodas;
+    h.querySelector('[data-a=tema]').onclick = () => { const t = TEMAS[(TEMAS.indexOf(temaActual()) + 1) % 3]; try { localStorage.setItem('tema', t); } catch(e){} aplicarTema(t); cerrarHoja(); toast('Tema ' + {auto:'automático (como el teléfono)', claro:'claro', oscuro:'oscuro'}[t] + '.'); };
     h.querySelector('[data-a=candado]').onclick = async () => { await kvSet('payload2', null); await kvSet('clave', null); location.reload(); };
   });
 };
@@ -1593,8 +1665,13 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && P && navigator.onLine && Date.now() - ultimaRevision > 60000){ ultimaRevision = Date.now(); refrescarPlanos(); }
 });
 
+// ---------- Tema claro / oscuro (automático: el del teléfono) ----------
+const TEMAS = ['auto', 'claro', 'oscuro'];
+function temaActual(){ try { return localStorage.getItem('tema') || 'auto'; } catch(e){ return 'auto'; } }
+function aplicarTema(t){ const r = document.documentElement; if (t === 'claro') r.dataset.theme = 'light'; else if (t === 'oscuro') r.dataset.theme = 'dark'; else delete r.dataset.theme; }
+
 // ---------- Arranque ----------
-$('#btnMenu').innerHTML = ic('mas'); $('#btnAtras').innerHTML = ic('atras'); $('#btnChatMenu').innerHTML = ic('mas');
+$('#btnMenu').innerHTML = ic('mas'); $('#btnCerrarZona').innerHTML = ic('cerrar'); $('#btnChatMenu').innerHTML = ic('mas');
 $('#btnClip').innerHTML = ic('clip'); $('#btnCam').innerHTML = ic('cam'); $('#btnDescartar').innerHTML = ic('basura');
 $('#vAtras').innerHTML = ic('atras'); $('#vBorrar').innerHTML = ic('basura');
 $('#sCerrar').innerHTML = ic('cerrar'); $('#sResp').innerHTML = ic('responder'); $('#sStar').innerHTML = ic('estrella');
