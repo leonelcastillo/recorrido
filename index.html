@@ -239,8 +239,10 @@ details[open]>summary .flecha{transform:rotate(90deg)}
 .pdet .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:9px}
 .minis{display:flex;gap:6px;margin-top:9px;overflow-x:auto}
 .minis img{width:86px;height:86px;object-fit:cover;border-radius:8px;flex:none;background:#2a3942}
-.btnWa{display:flex;align-items:center;justify-content:center;gap:8px;margin:4px 14px 10px;padding:10px;border-radius:22px;background:#25d366;color:#0b141a;font-weight:700;width:calc(100% - 28px)}
-.btnWa svg{width:18px;height:18px}
+.accPer{display:flex;gap:8px;padding:4px 14px 12px}
+.btnAcc{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 6px;border-radius:22px;background:var(--head);border:1px solid var(--line);font-weight:600;font-size:14px}
+.btnAcc.verde{background:#25d366;border-color:#25d366;color:#0b141a}
+.btnAcc svg{width:18px;height:18px}
 
 /* Hoja inferior, visor, toast */
 #fondo{position:fixed;inset:0;background:#0008;z-index:34}
@@ -1429,7 +1431,7 @@ async function pintarPlan(conservar){
       const mias = actsDe(per.id); if (!mias.length) continue;
       const hh = mias.filter(a => HECHOS[a.id]).length;
       h += det(`p:${per.id}`, false, sum(esc(per.nombre), `${esc(per.oficio)} · ${mias.length} act. · ${hh} hechas · ${fdia(pl.dias[mias[0].d0])} → ${fdia(pl.dias[Math.max(...mias.map(a => a.d1))])}`, puntos(mias)),
-        `<button class="btnWa" data-per="${esc(per.id)}">${ic('enviar')} Enviar su lista por WhatsApp</button>` + mias.map(a => actHTML(a, false, actsAb)).join(''));
+        `<div class="accPer"><button class="btnAcc" data-copiar="${esc(per.id)}">${ic('copiar')} Copiar texto</button><button class="btnAcc verde" data-pdf="${esc(per.id)}">${ic('subir')} Enviar PDF</button></div>` + mias.map(a => actHTML(a, false, actsAb)).join(''));
     }
     const sin = acts.filter(a => !a.responsable);
     if (sin.length) h += det('p:-', false, sum('Por asignar', `${sin.length} actividades sin responsable`, puntos(sin)), sin.map(a => actHTML(a, false, actsAb)).join(''));
@@ -1455,25 +1457,135 @@ $('#lista').addEventListener('click', async e => {
   }
   const img = e.target.closest('img[data-msg]');
   if (img){ const m = await req(st('msgs').get(img.dataset.msg)); if (m) abrirVisor(m); return; }
-  const wa = e.target.closest('.btnWa'); if (wa){ enviarLista(wa.dataset.per); return; }
+  const cp = e.target.closest('[data-copiar]'); if (cp){ copiarTexto(cp.dataset.copiar); return; }
+  const pdf = e.target.closest('[data-pdf]'); if (pdf){ enviarPDF(pdf.dataset.pdf); return; }
   if (act) act.classList.toggle('abierta');
 });
 
-// Manda la lista pendiente de una persona: texto + fotos, con el menú de compartir del teléfono (elige WhatsApp).
-async function enviarLista(pid){
+// ---------- Mandarle a cada persona su lista: texto para pegar y PDF con fotos ----------
+function textoLista(pid){
   const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
-  if (!pend.length){ toast(`${per.nombre} ya tiene todo hecho.`); return; }
-  const txt = [`Hola ${per.nombre.split(' ')[0]}, te paso tu lista del plan de culminación de la obra ${P.titulo}.`,
+  if (!pend.length) return null;
+  return [`Hola ${per.nombre.split(' ')[0]}, te paso tu lista del plan de culminación de la obra ${P.titulo}.`,
     `Son ${pend.length} actividad${pend.length !== 1 ? 'es' : ''}:`, '',
     ...pend.map((a, i) => `${i + 1}. ${AREAS[a.area] ? AREAS[a.area].nombre + ': ' : ''}${a.titulo} (${a.rango})${a.prioridad === 'alta' ? ' ⚠ prioridad' : ''}`),
-    '', 'Te mando las fotos de cada punto. Cuando termines cada una, mándame una foto. Cualquier duda me escribes.'].join('\n');
-  const files = [];
-  for (const a of pend) for (const f of a.fotos || []){ const m = planFotos[f.cod]; if (m && files.length < 10) files.push(new File([m.blob], `${a.id} ${f.cod}.jpg`, {type: m.blob.type || 'image/jpeg'})); }
-  try {
-    if (files.length && navigator.canShare && navigator.canShare({files, text: txt})){ await navigator.share({files, text: txt}); return; }
-    if (navigator.share){ await navigator.share({text: txt}); return; }
-  } catch(e){ if (e.name === 'AbortError') return; }
-  location.href = `https://wa.me/${per.telefono || ''}?text=${encodeURIComponent(txt)}`;
+    '', 'En el PDF van las fotos y cómo se recibe cada punto. Cuando termines cada una, mándame una foto. Cualquier duda me escribes.'].join('\n');
+}
+async function copiarTexto(pid){
+  const per = P.plan.personas.find(x => x.id === pid), txt = textoLista(pid);
+  if (!txt){ toast(`${per.nombre} ya tiene todo hecho.`); return; }
+  let ok = false;
+  try { await navigator.clipboard.writeText(txt); ok = true; } catch(e){}
+  if (!ok){   // respaldo para navegadores que no dejan usar el portapapeles
+    const t = document.createElement('textarea'); t.value = txt; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t);
+    t.select(); try { ok = document.execCommand('copy'); } catch(e){} t.remove();
+  }
+  toast(ok ? `Copiado. Pégalo en el chat de ${per.nombre.split(' ')[0]}.` : 'No se pudo copiar.', 3500);
+}
+
+let jsPDFcargado = null;
+function cargarJsPDF(){
+  if (window.jspdf) return Promise.resolve(window.jspdf.jsPDF);
+  return jsPDFcargado || (jsPDFcargado = new Promise((ok, mal) => {
+    const s = document.createElement('script'); s.src = 'jspdf.umd.min.js';
+    s.onload = () => ok(window.jspdf.jsPDF); s.onerror = () => { jsPDFcargado = null; mal(new Error('falta jspdf.umd.min.js')); };
+    document.head.appendChild(s);
+  }));
+}
+// Las letras estándar del PDF no traen flechas ni emojis
+const limpio = s => String(s ?? '').replace(/→/g, '-').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/[–—]/g, '-').replace(/[^\x09\x0A\x0D\x20-\xFF]/g, '');
+async function fotoParaPdf(blob, lado = 1000){
+  const bm = await createImageBitmap(blob); const k = Math.min(1, lado/Math.max(bm.width, bm.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bm.width*k); c.height = Math.round(bm.height*k);
+  c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
+  return {url: c.toDataURL('image/jpeg', .75), w: c.width, h: c.height};
+}
+async function pdfPersona(pid){
+  const JsPDF = await cargarJsPDF();
+  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
+  const doc = new JsPDF({unit: 'mm', format: 'a4'}), W = 210, H = 297, M = 14, AN = W - 2*M, VERDE = [0, 121, 107];
+  const PRI = {alta: [217, 48, 37], media: [227, 116, 0], baja: [110, 119, 129]};
+  let y = M;
+  const salto = alto => { if (y + alto > H - M - 6){ doc.addPage(); y = M; } };
+  const texto = (t, x, tam, estilo = 'normal', color = [31, 35, 40], ancho = AN) => {
+    doc.setFont('helvetica', estilo); doc.setFontSize(tam); doc.setTextColor(...color);
+    const l = doc.splitTextToSize(limpio(t), ancho), alto = l.length * tam * .42;
+    salto(alto); doc.text(l, x, y + tam * .35); y += alto; return alto;
+  };
+  const ini = P.plan.dias[pend[0].d0], fin = P.plan.dias[Math.max(...pend.map(a => a.d1))];
+  // cabecera
+  texto(`OBRA ${P.titulo} · PLAN DE CULMINACIÓN`, M, 9, 'bold', VERDE); y += 1;
+  texto(per.nombre, M, 20, 'bold'); y += 1;
+  texto(`${per.oficio} · ${pend.length} actividad${pend.length !== 1 ? 'es' : ''} · del ${fdia(ini)} al ${fdia(fin)}`, M, 10, 'normal', [87, 96, 106]);
+  doc.setDrawColor(...VERDE); doc.setLineWidth(.8); doc.line(M, y + 2, W - M, y + 2); y += 6;
+  const instr = 'Haz las actividades en este orden. Marca la casilla al terminar cada una y mándale una foto al ingeniero. Si algo no se puede hacer como dice aquí, avisa antes de empezar.';
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); const li = doc.splitTextToSize(instr, AN - 8);
+  doc.setFillColor(238, 247, 245); doc.roundedRect(M, y, AN, li.length * 4 + 5, 2, 2, 'F');
+  doc.setTextColor(31, 35, 40); doc.text(li, M + 4, y + 5.5); y += li.length * 4 + 9;
+  // actividades
+  for (const a of pend){
+    salto(24);
+    doc.setDrawColor(31, 35, 40); doc.setLineWidth(.5); doc.roundedRect(M, y + .5, 5, 5, .8, .8);
+    const y0 = y; texto(a.titulo, M + 8, 12.5, 'bold', [31, 35, 40], AN - 8);
+    const meta = `${a.id} · ${AREAS[a.area] ? NIVELES[AREAS[a.area].nivel] + ' · ' + AREAS[a.area].nombre : ''} · ${a.rango} · prioridad ${a.prioridad}`;
+    y += .5; texto(meta, M + 8, 9, 'normal', PRI[a.prioridad] || [87, 96, 106], AN - 8);
+    if (y - y0 < 6) y = y0 + 6;
+    y += 1.5;
+    const bloque = (lbl, t) => { if (!t) return; y += 1; texto(lbl.toUpperCase(), M + 8, 7.5, 'bold', [87, 96, 106], AN - 8); y += .3; texto(t, M + 8, 10, 'normal', [31, 35, 40], AN - 8); };
+    if (a.detalle){ texto(a.detalle, M + 8, 10, 'normal', [31, 35, 40], AN - 8); }
+    bloque('Con', (a.ayudantes || []).map(nomPer).join(', '));
+    bloque('Empieza después de', (a.depende_de || []).map(d => { const o = P.plan.actividades.find(x => x.id === d); return d + (o ? ' ' + o.titulo : ''); }).join(' · '));
+    bloque('Cómo se recibe', a.criterio);
+    bloque('Materiales', (a.materiales || []).join(' · '));
+    const fotos = (a.fotos || []).map(f => ({f, m: planFotos[f.cod]})).filter(x => x.m).slice(0, 4);
+    if (fotos.length){
+      y += 3; const col = fotos.length === 1 ? 1 : 2, cw = (AN - 8 - (col - 1)*4) / col;
+      for (let i = 0; i < fotos.length; i += col){
+        const fila = [];
+        for (const x of fotos.slice(i, i + col)) { try { fila.push({...(await fotoParaPdf(x.m.blob)), nota: x.f.nota}); } catch(e){} }
+        if (!fila.length) continue;
+        const alto = Math.min(70, Math.max(...fila.map(p => cw * p.h / p.w)));
+        salto(alto + 6);
+        fila.forEach((p, j) => {
+          const w = Math.min(cw, alto * p.w / p.h), h = w * p.h / p.w, x = M + 8 + j*(cw + 4) + (cw - w)/2;
+          doc.addImage(p.url, 'JPEG', x, y, w, h);
+          if (p.nota){ doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(87, 96, 106); doc.text(doc.splitTextToSize(limpio(p.nota), cw)[0], M + 8 + j*(cw + 4), y + alto + 3.5); }
+        });
+        y += alto + 6;
+      }
+    }
+    y += 3; doc.setDrawColor(208, 215, 222); doc.setLineWidth(.3); doc.line(M, y, W - M, y); y += 5;
+  }
+  // firmas
+  salto(24); y += 12; doc.setDrawColor(31, 35, 40); doc.setLineWidth(.3);
+  doc.line(M, y, M + 80, y); doc.line(W - M - 80, y, W - M, y);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(87, 96, 106);
+  doc.text('Entregado por (ingeniero de obra) · fecha', M, y + 4); doc.text(limpio(`Recibido por ${per.nombre} · fecha`), W - M - 80, y + 4);
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++){ doc.setPage(i); doc.setFontSize(8); doc.setTextColor(140, 149, 159); doc.text(limpio(`${P.titulo} · ${per.nombre} · página ${i} de ${n} · ${new Date().toLocaleDateString('es-VE')}`), W/2, H - 7, {align: 'center'}); }
+  return doc.output('blob');
+}
+async function enviarPDF(pid){
+  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
+  if (!pend.length){ toast(`${per.nombre} ya tiene todo hecho.`); return; }
+  toast('Armando el PDF…', 0);
+  let blob;
+  try { blob = await pdfPersona(pid); }
+  catch(e){ toast('No pude armar el PDF: ' + e.message, 5000); return; }
+  $('#toast').hidden = true;
+  const nombre = `${P.titulo} - ${per.nombre}.pdf`.replace(/[\\/:*?"<>|]/g, '-');
+  const file = new File([blob], nombre, {type: 'application/pdf'});
+  const puede = navigator.canShare && navigator.canShare({files: [file]});
+  // Armar el PDF tarda: el teléfono pide un toque nuevo para abrir el menú de compartir
+  hoja(`<h3>PDF de ${esc(per.nombre)}</h3><p>${pend.length} actividad${pend.length !== 1 ? 'es' : ''} pendiente${pend.length !== 1 ? 's' : ''} con sus fotos · ${(blob.size/1048576).toFixed(1)} MB</p>
+    ${puede ? `<button class="op" data-a="comp">${ic('subir')}<div>Enviar<small>Elige WhatsApp y el chat de ${esc(per.nombre.split(' ')[0])}</small></div></button>` : ''}
+    <button class="op" data-a="ver">${ic('imagen')}<div>Ver el PDF</div></button>
+    <button class="op" data-a="desc">${ic('bajar')}<div>Guardar en Descargas</div></button>`, h => {
+    const c = h.querySelector('[data-a=comp]');
+    if (c) c.onclick = async () => { try { await navigator.share({files: [file]}); cerrarHoja(); } catch(e){ if (e.name !== 'AbortError') toast('No se pudo compartir: ' + e.message, 4000); } };
+    h.querySelector('[data-a=ver]').onclick = () => { const u = URL.createObjectURL(file); window.open(u, '_blank'); setTimeout(() => URL.revokeObjectURL(u), 120000); };
+    h.querySelector('[data-a=desc]').onclick = () => { const u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); cerrarHoja(); toast('Guardado en Descargas.'); };
+  });
 }
 
 // Buscar plan nuevo cuando la app vuelve a primer plano (con internet)
