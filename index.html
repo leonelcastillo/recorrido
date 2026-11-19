@@ -197,6 +197,51 @@ svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .gridEt button{padding:9px 14px;border-radius:10px;color:#fff;font-weight:700}
 #visor .ib.on{background:#ffffff33}
 
+/* Plan de culminación */
+.planCab{margin:12px;padding:14px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.planCab h2{margin:0;font-size:18px}
+.planCab .sub{color:var(--muted);font-size:13px;margin-top:4px}
+.prog{height:6px;border-radius:3px;background:#2a3942;margin-top:10px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--accent)}
+.segm{display:flex;margin:4px 12px 8px;background:var(--panel);border-radius:10px;padding:3px;border:1px solid var(--line)}
+.segm button{flex:1;padding:9px 0;border-radius:8px;font-size:14px;color:var(--muted)}
+.segm button.on{background:var(--head);color:var(--ink);font-weight:600}
+details.blq{margin:6px 12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+details.blq.sub{margin:0;border:0;border-top:1px solid var(--line);border-radius:0;background:#0d171d}
+details.blq>summary{list-style:none;display:flex;align-items:center;gap:8px;padding:12px 12px 12px 14px;cursor:pointer}
+details.blq>summary::-webkit-details-marker{display:none}
+details.blq.sub>summary{padding-left:18px}
+summary .st{flex:1;min-width:0}
+summary .st b{font-weight:600;display:block}
+summary .st small{color:var(--muted);font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+summary .flecha{color:var(--muted);transition:transform .15s;display:grid}
+summary .flecha svg{width:20px;height:20px}
+details[open]>summary .flecha{transform:rotate(90deg)}
+.hoyChip{background:var(--accent);color:#0b141a;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;vertical-align:1px}
+.pdn{display:flex;align-items:center;gap:3px;font-size:12px;color:var(--muted)}
+.pd{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.pd.alta{background:#f15c6d}.pd.media{background:var(--pend)}.pd.baja{background:#8696a0}
+.pbody{padding:2px 14px 12px;font-size:14px}
+.pbody p{margin:8px 0}
+.pbody .aviso{color:#ffd279}
+.pbody .res{color:var(--muted)}
+.pact{display:flex;gap:10px;padding:10px 12px 10px 14px;border-top:1px solid var(--line);align-items:flex-start;cursor:pointer}
+.pact .chk{width:26px;height:26px;border-radius:7px;border:2px solid var(--muted);flex:none;display:grid;place-items:center;margin-top:1px}
+.pact .chk svg{width:18px;height:18px;stroke-width:3}
+.pact .chk.on{background:var(--accent);border-color:var(--accent);color:#0b141a}
+.pact .cuerpo{flex:1;min-width:0}
+.pact .t{font-size:15px;line-height:1.3}
+.pact.hecha .t{text-decoration:line-through;color:var(--muted)}
+.pact .m{font-size:12.5px;color:var(--muted);margin-top:3px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.pact .cod{color:var(--accent);font-weight:700}
+.pdet{display:none;margin-top:8px;font-size:14px;line-height:1.4}
+.pact.abierta .pdet{display:block}
+.pdet .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:9px}
+.minis{display:flex;gap:6px;margin-top:9px;overflow-x:auto}
+.minis img{width:86px;height:86px;object-fit:cover;border-radius:8px;flex:none;background:#2a3942}
+.btnWa{display:flex;align-items:center;justify-content:center;gap:8px;margin:4px 14px 10px;padding:10px;border-radius:22px;background:#25d366;color:#0b141a;font-weight:700;width:calc(100% - 28px)}
+.btnWa svg{width:18px;height:18px}
+
 /* Hoja inferior, visor, toast */
 #fondo{position:fixed;inset:0;background:#0008;z-index:34}
 #hoja{position:fixed;left:0;right:0;bottom:0;background:var(--head);border-radius:18px 18px 0 0;z-index:35;padding:8px 0 calc(12px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto;animation:sube .18s ease-out}
@@ -354,6 +399,8 @@ const IC = {
   carita:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>',
   girar:'<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
   deshacer:'<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+  chev:'<polyline points="9 18 15 12 9 6"/>',
+  lista:'<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
 };
 const ic = (n, extra='') => `<svg class="i" viewBox="0 0 24 24" ${extra}>${IC[n]}</svg>`;
 const $ = s => document.querySelector(s);
@@ -463,19 +510,26 @@ async function refrescarPlanos(){
   try {
     const c = await kvGet('clave'); if (!c) return;
     const nuevo = await descifrar(c);
-    if (JSON.stringify(nuevo) !== JSON.stringify(P)){ await kvSet('payload2', nuevo); toast('Planos actualizados. Cierra y abre la app para verlos.', 5000); }
+    if (JSON.stringify(nuevo) !== JSON.stringify(P)){
+      await kvSet('payload2', nuevo);
+      const mismos = JSON.stringify([nuevo.niveles, nuevo.generales]) === JSON.stringify([P.niveles, P.generales]);
+      const planNuevo = JSON.stringify(nuevo.plan || null) !== JSON.stringify(P.plan || null);
+      if (mismos){ P = nuevo; if (!$('#inicio').hidden) pintarInicio(); if (planNuevo && P.plan) toast('Llegó el plan de culminación: pestaña PLAN.', 5000); }
+      else toast('Planos actualizados. Cierra y abre la app para verlos.', 5000);
+    }
   } catch(e){}
 }
 
 // ---------- Inicio ----------
 function pintarTabs(){
-  const ts = [...P.niveles.map(n => [n.id, n.corto || n.nombre]), ['gen','Generales']];
+  const ts = [...P.niveles.map(n => [n.id, n.corto || n.nombre]), ['gen','Generales'], ...(P.plan ? [['plan','Plan']] : [])];
+  if (tab === 'plan' && !P.plan) tab = P.niveles[0].id;
   $('#tabs').innerHTML = ts.map(([k,n]) => `<button data-k="${k}" class="${k===tab?'on':''}">${esc(n)}</button>`).join('');
   $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { tab = b.dataset.k; pintarInicio(); $('#scrollInicio').scrollTop = 0; });
 }
 function pintarPlano(){
   const w = $('#planoWrap');
-  if (tab==='gen'){ w.hidden = true; $('#leyenda').hidden = true; return; }
+  if (tab==='gen' || tab==='plan'){ w.hidden = true; $('#leyenda').hidden = true; return; }
   w.hidden = false; $('#leyenda').hidden = false;
   const p = P.niveles.find(n => n.id===tab), W = p.w, H = p.h, fs = W*0.026;
   let s = `<svg viewBox="0 0 ${W} ${H}">`;
@@ -504,6 +558,7 @@ function filaHTML(a){
     <div class="l2"><span class="prev">${prevTxt(r.ultimo)}</span>${r.nuevos?`<span class="badge">${r.nuevos}</span>`:''}</div></div></button>`;
 }
 function pintarLista(){
+  if (tab === 'plan') return pintarPlan();
   const lista = Object.values(AREAS).filter(a => a.nivel===tab);
   $('#lista').innerHTML = `<div class="seccion">${tab==='gen'?'Lo que no cae en un cuarto':'Áreas · toca una en el plano o en la lista'}</div>` + lista.map(filaHTML).join('');
   $('#lista').querySelectorAll('.fila').forEach(b => b.onclick = () => abrirChat(b.dataset.id));
@@ -846,10 +901,12 @@ $('#btnMenu').onclick = async () => {
     <button class="op" data-a="nuevo">${ic('subir')}<div>Solo lo nuevo<small>${nuevos} mensaje(s) sin enviar · los ya enviados tienen ✓✓ azul</small></div></button>
     <button class="op" data-a="todo">${ic('disco')}<div>Todo otra vez<small>${todos.length} mensaje(s)</small></div></button>
     <div class="seccion">${uso}</div>
+    <button class="op" data-a="comprimir">${ic('imagen')}<div>Comprimir fotos guardadas<small>Libera espacio: deja las fotos como las manda WhatsApp</small></div></button>
     <button class="op" data-a="candado">${ic('candado')}<div>Bloquear<small>Vuelve a pedir la clave (no borra nada)</small></div></button>`, h => {
     h.querySelector('[data-a=star]').onclick = () => verDestacados(todos);
     h.querySelector('[data-a=nuevo]').onclick = () => exportar(false);
     h.querySelector('[data-a=todo]').onclick = () => exportar(true);
+    h.querySelector('[data-a=comprimir]').onclick = comprimirTodas;
     h.querySelector('[data-a=candado]').onclick = async () => { await kvSet('payload2', null); await kvSet('clave', null); location.reload(); };
   });
 };
@@ -907,6 +964,8 @@ async function exportar(todo){
   const borrados = (await kvGet('borrados')) || [];
   if (!lista.length && !borrados.length){ toast('No hay nada nuevo por enviar.'); return; }
   const entradas = [], mensajes = [];
+  const grandes = lista.filter(m => m.tipo === 'foto' && (todo || !m.exportado) && ((m.blob && m.blob.size > 700*1024) || (m.original && m.original.size > 700*1024)));
+  for (let i = 0; i < grandes.length; i++){ toast(`Comprimiendo fotos: ${i + 1} de ${grandes.length}…`, 0); await comprimirMsg(grandes[i]); }
   for (const m of lista){
     const a = AREAS[m.area]; if (!a) continue;
     const reg = {id:m.id, area:m.area, carpeta:a.carpeta, tipo:m.tipo, fecha:m.fecha, texto:m.texto||null, dur:m.dur||null, tomada:m.tomada||null, original:m.nombre||null,
@@ -923,6 +982,7 @@ async function exportar(todo){
     mensajes.push(reg);
   }
   const json = {origen:'telefono', titulo:P.titulo, exportado:new Date().toISOString(), estados:ESTADOS, borrados,
+    plan_hechos: P.plan ? {version: P.plan.version, ids: (await kvGet('planHechos')) || {}} : null,
     areas:Object.fromEntries(Object.values(AREAS).map(a => [a.id, {nivel:NIVELES[a.nivel], nombre:a.nombre, carpeta:a.carpeta}])), mensajes};
   entradas.push({nombre:'recorrido-telefono.json', blob:new Blob([JSON.stringify(json, null, 2)], {type:'application/json'})});
   let zip;
@@ -1247,6 +1307,10 @@ $('#edEnviar').onclick = async () => {
       try { d.blob = await componer(it); d.original = it.file; d.editada = true; d.nombre = (it.file.name || 'foto').replace(/\.[^.]*$/, '') + ' editada.jpg'; }
       catch(e){ toast('No pude guardar los dibujos de una foto; quedó la original.', 4000); d.blob = it.file; }
     }
+    if (!it.video){   // comprimir como WhatsApp
+      const c = await comprimir(d.blob, d.nombre); d.blob = c.blob; d.nombre = c.nombre;
+      if (d.original){ const o = await comprimir(d.original, d.original.name || 'original.jpg'); d.original = o.blob === d.original ? d.original : new File([o.blob], o.nombre, {type:'image/jpeg'}); }
+    }
     if (it.pie.trim()) d.texto = it.pie.trim();
     if (!it.video) d.thumb = await miniatura(d.blob);
     await agregar(area, it.video ? 'video' : 'foto', d);
@@ -1269,6 +1333,154 @@ $('#camCerrar').innerHTML = ic('cerrar'); $('#camGirar').innerHTML = ic('girar')
 $('#edCerrar').innerHTML = ic('cerrar'); $('#edDeshacer').innerHTML = ic('deshacer'); $('#edQuitar').innerHTML = ic('basura');
 $('#edSticker').innerHTML = ic('carita'); $('#edEtiq').innerHTML = ic('etiqueta'); $('#edTexto').innerHTML = ic('letra'); $('#edLapiz').innerHTML = ic('lapiz');
 $('#edEnviar').innerHTML = ic('enviar'); $('#vOrig').innerHTML = ic('imagen');
+
+// ---------- Compresor de fotos (como WhatsApp: lado mayor 2048 px, JPEG 82 %) ----------
+async function comprimir(blob, nombre = 'foto.jpg', lado = 2048, q = .82){
+  try {
+    if (!blob || blob.size < 500*1024) return {blob, nombre};
+    if (blob.type && !/^image\/(jpeg|png|webp|heic|heif)/.test(blob.type)) return {blob, nombre};
+    const bm = await createImageBitmap(blob); const k = Math.min(1, lado/Math.max(bm.width, bm.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bm.width*k); c.height = Math.round(bm.height*k);
+    c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
+    const b = await new Promise(ok => c.toBlob(ok, 'image/jpeg', q));
+    if (!b || b.size >= blob.size) return {blob, nombre};
+    return {blob: b, nombre: (nombre || 'foto').replace(/\.[^.]*$/, '') + '.jpg'};
+  } catch(e){ return {blob, nombre}; }
+}
+// Comprime en el teléfono una foto ya guardada (y su original sin dibujos), y la deja así para liberar espacio.
+async function comprimirMsg(m){
+  if (m.tipo !== 'foto') return false;
+  let cambio = false;
+  if (m.blob && m.blob.size > 700*1024){ const c = await comprimir(m.blob, m.nombre); if (c.blob !== m.blob){ m.blob = c.blob; m.nombre = c.nombre; cambio = true; } }
+  if (m.original && m.original.size > 700*1024){ const c = await comprimir(m.original, m.original.name || 'original.jpg'); if (c.blob !== m.original){ m.original = new File([c.blob], c.nombre, {type:'image/jpeg'}); cambio = true; } }
+  if (cambio) await msgPut(m);
+  return cambio;
+}
+async function comprimirTodas(){
+  cerrarHoja();
+  const fotos = (await msgsTodos()).filter(m => m.tipo === 'foto' && ((m.blob && m.blob.size > 700*1024) || (m.original && m.original.size > 700*1024)));
+  if (!fotos.length){ toast('Las fotos ya están comprimidas.'); return; }
+  let antes = 0, despues = 0, i = 0;
+  for (const m of fotos){
+    toast(`Comprimiendo fotos: ${++i} de ${fotos.length}…`, 0);
+    antes += (m.blob ? m.blob.size : 0) + (m.original ? m.original.size : 0);
+    await comprimirMsg(m);
+    despues += (m.blob ? m.blob.size : 0) + (m.original ? m.original.size : 0);
+  }
+  toast(`Listo: ${fotos.length} fotos, de ${(antes/1048576).toFixed(0)} MB a ${(despues/1048576).toFixed(0)} MB.`, 5000);
+}
+
+// ---------- Plan de culminación: lo arma Claude en la PC y llega cifrado junto con los planos ----------
+let planVista = 'dia', HECHOS = {}, planUrls = [], planFotos = {};
+const hoyISO = () => new Date().toLocaleDateString('en-CA');
+const fdia = iso => new Date(iso + 'T12:00:00').toLocaleDateString('es-VE', {weekday:'short', day:'2-digit', month:'2-digit'});
+const nomPer = id => { const x = P.plan.personas.find(q => q.id === id); return x ? x.nombre : 'Por asignar'; };
+const purl = b => { const u = URL.createObjectURL(b); planUrls.push(u); return u; };
+const actsDe = pid => P.plan.actividades.filter(a => a.responsable === pid || (a.ayudantes || []).includes(pid)).sort((x, y) => x.d0 - y.d0 || x.d1 - y.d1);
+const puntos = l => ['alta','media','baja'].map(p => { const n = l.filter(a => a.prioridad === p && !HECHOS[a.id]).length; return n ? `<span class="pdn"><span class="pd ${p}"></span>${n}</span>` : ''; }).join('');
+async function indexarFotos(){ planFotos = {}; for (const m of await msgsTodos()) if (m.tipo === 'foto' && m.blob) planFotos[m.id.slice(-4)] = m; }
+
+function actHTML(a, verResp, abiertas){
+  const h = HECHOS[a.id], ar = AREAS[a.area], fotos = (a.fotos || []).map(f => planFotos[f.cod]).filter(Boolean);
+  return `<div class="pact${h ? ' hecha' : ''}${abiertas && abiertas.has(a.id) ? ' abierta' : ''}" data-id="${esc(a.id)}">
+    <button class="chk${h ? ' on' : ''}" aria-label="Marcar hecha">${h ? ic('check') : ''}</button>
+    <div class="cuerpo"><div class="t">${esc(a.titulo)}</div>
+    <div class="m"><span class="pd ${esc(a.prioridad)}"></span><span class="cod">${esc(a.id)}</span>${ar ? esc(ar.nombre) : ''} · ${esc(a.rango)}${verResp ? ' · ' + esc(nomPer(a.responsable)) : ''}${fotos.length ? ' · 📷 ' + fotos.length : ''}</div>
+    <div class="pdet">${a.detalle ? `<div>${esc(a.detalle)}</div>` : ''}
+      ${(a.ayudantes || []).length ? `<div class="lbl">Con</div><div>${esc(a.ayudantes.map(nomPer).join(', '))}</div>` : ''}
+      ${(a.depende_de || []).length ? `<div class="lbl">Después de</div><div>${esc(a.depende_de.map(d => { const o = P.plan.actividades.find(x => x.id === d); return d + (o ? ' ' + o.titulo : ''); }).join(' · '))}</div>` : ''}
+      ${a.criterio ? `<div class="lbl">Cómo se recibe</div><div>${esc(a.criterio)}</div>` : ''}
+      ${(a.materiales || []).length ? `<div class="lbl">Materiales</div><div>${esc(a.materiales.join(' · '))}</div>` : ''}
+      ${fotos.length ? `<div class="minis">${fotos.map(m => `<img loading="lazy" data-msg="${m.id}" src="${purl(m.thumb || m.blob)}" alt="">`).join('')}</div>` : ''}
+      ${h ? `<div class="lbl">Hecha</div><div>${new Date(h).toLocaleString('es-VE', {day:'2-digit', month:'2-digit', hour:'numeric', minute:'2-digit'})}</div>` : ''}
+    </div></div></div>`;
+}
+
+async function pintarPlan(conservar){
+  const L = $('#lista'), sc = $('#scrollInicio'), pl = P.plan;
+  const abiertos = conservar ? new Set([...L.querySelectorAll('details[open]')].map(d => d.dataset.k)) : null;
+  const actsAb = conservar ? new Set([...L.querySelectorAll('.pact.abierta')].map(a => a.dataset.id)) : new Set();
+  const y = sc.scrollTop;
+  planUrls.forEach(u => URL.revokeObjectURL(u)); planUrls = [];
+  HECHOS = (await kvGet('planHechos')) || {};
+  await indexarFotos();
+  const acts = pl.actividades, n = acts.length, hechas = acts.filter(a => HECHOS[a.id]).length, hoy = hoyISO();
+  const det = (k, abrir, resumen, cuerpo, extraCls = '') => `<details class="blq${extraCls}" data-k="${k}"${(abiertos ? abiertos.has(k) : abrir) ? ' open' : ''}>${resumen}${cuerpo}</details>`;
+  const sum = (t, s, extra = '') => `<summary><div class="st"><b>${t}</b><small>${s}</small></div>${extra}<span class="flecha">${ic('chev')}</span></summary>`;
+  let h = `<div class="planCab"><h2>${esc(pl.titulo)}</h2>
+    <div class="sub">${fdia(pl.dias[0])} → ${fdia(pl.dias[pl.dias.length - 1])} · ${n} actividades · ${pl.personas.length} personas</div>
+    <div class="prog"><i style="width:${n ? hechas/n*100 : 0}%"></i></div>
+    <div class="sub">${hechas} de ${n} hechas · emitido ${fdia(pl.emitido)}</div></div>`;
+  if (pl.preguntas.length || pl.avisos.length)
+    h += det('preg', false, sum(`Preguntas y avisos (${pl.preguntas.length + pl.avisos.length})`, 'Revísalos antes de repartir las listas', '<span class="pd alta"></span>'),
+      `<div class="pbody">${pl.preguntas.map(q => `<p><b>${esc(q.para)}:</b> ${esc(q.texto)}</p>`).join('')}${pl.avisos.map(x => `<p class="aviso">${esc(x)}</p>`).join('')}${pl.resumen ? `<p class="res">${esc(pl.resumen)}</p>` : ''}</div>`);
+  h += `<div class="segm">${[['dia','Por día'], ['persona','Por persona'], ['area','Por área']].map(([k, t]) => `<button data-v="${k}" class="${planVista === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+  if (planVista === 'dia'){
+    let abrir = pl.dias.indexOf(hoy); if (abrir < 0 && hoy < pl.dias[0]) abrir = 0;
+    pl.dias.forEach((d, i) => {
+      const del = acts.filter(a => a.d0 <= i && a.d1 >= i), hh = del.filter(a => HECHOS[a.id]).length;
+      const pers = [...new Set(del.map(a => a.responsable))];
+      const cuerpo = pers.map(pid => { const mias = del.filter(a => a.responsable === pid);
+        return det(`d${i}:${pid}`, false, sum(esc(nomPer(pid)), mias.map(a => esc(a.titulo)).join(' · '), puntos(mias)), mias.map(a => actHTML(a, false, actsAb)).join(''), ' sub'); }).join('');
+      h += det(`d${i}`, i === abrir, sum(fdia(d).toUpperCase() + (d === hoy ? ' <span class="hoyChip">HOY</span>' : ''), `${del.length} actividades · ${pers.length} personas · ${hh} hechas`, puntos(del)), cuerpo);
+    });
+  } else if (planVista === 'persona'){
+    for (const per of pl.personas){
+      const mias = actsDe(per.id); if (!mias.length) continue;
+      const hh = mias.filter(a => HECHOS[a.id]).length;
+      h += det(`p:${per.id}`, false, sum(esc(per.nombre), `${esc(per.oficio)} · ${mias.length} act. · ${hh} hechas · ${fdia(pl.dias[mias[0].d0])} → ${fdia(pl.dias[Math.max(...mias.map(a => a.d1))])}`, puntos(mias)),
+        `<button class="btnWa" data-per="${esc(per.id)}">${ic('enviar')} Enviar su lista por WhatsApp</button>` + mias.map(a => actHTML(a, false, actsAb)).join(''));
+    }
+    const sin = acts.filter(a => !a.responsable);
+    if (sin.length) h += det('p:-', false, sum('Por asignar', `${sin.length} actividades sin responsable`, puntos(sin)), sin.map(a => actHTML(a, false, actsAb)).join(''));
+  } else {
+    for (const nv of [...P.niveles.map(x => x.id), 'gen']){
+      const ars = Object.values(AREAS).filter(a => a.nivel === nv).map(a => [a, acts.filter(x => x.area === a.id)]).filter(([, l]) => l.length);
+      if (!ars.length) continue;
+      h += `<div class="seccion">${esc(NIVELES[nv])}</div>`;
+      for (const [ar, l] of ars) h += det(`a:${ar.id}`, false, sum(esc(ar.nombre), `${l.length} actividades · ${l.filter(a => HECHOS[a.id]).length} hechas`, puntos(l)), l.map(a => actHTML(a, true, actsAb)).join(''));
+    }
+  }
+  L.innerHTML = h;
+  L.querySelectorAll('.segm button').forEach(b => b.onclick = () => { planVista = b.dataset.v; pintarPlan(); });
+  if (conservar) sc.scrollTop = y;
+}
+
+$('#lista').addEventListener('click', async e => {
+  if (tab !== 'plan') return;
+  const act = e.target.closest('.pact');
+  if (e.target.closest('.chk') && act){
+    const id = act.dataset.id; if (HECHOS[id]) delete HECHOS[id]; else HECHOS[id] = new Date().toISOString();
+    await kvSet('planHechos', HECHOS); vibrar(15); pintarPlan(true); return;
+  }
+  const img = e.target.closest('img[data-msg]');
+  if (img){ const m = await req(st('msgs').get(img.dataset.msg)); if (m) abrirVisor(m); return; }
+  const wa = e.target.closest('.btnWa'); if (wa){ enviarLista(wa.dataset.per); return; }
+  if (act) act.classList.toggle('abierta');
+});
+
+// Manda la lista pendiente de una persona: texto + fotos, con el menú de compartir del teléfono (elige WhatsApp).
+async function enviarLista(pid){
+  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
+  if (!pend.length){ toast(`${per.nombre} ya tiene todo hecho.`); return; }
+  const txt = [`Hola ${per.nombre.split(' ')[0]}, te paso tu lista del plan de culminación de la obra ${P.titulo}.`,
+    `Son ${pend.length} actividad${pend.length !== 1 ? 'es' : ''}:`, '',
+    ...pend.map((a, i) => `${i + 1}. ${AREAS[a.area] ? AREAS[a.area].nombre + ': ' : ''}${a.titulo} (${a.rango})${a.prioridad === 'alta' ? ' ⚠ prioridad' : ''}`),
+    '', 'Te mando las fotos de cada punto. Cuando termines cada una, mándame una foto. Cualquier duda me escribes.'].join('\n');
+  const files = [];
+  for (const a of pend) for (const f of a.fotos || []){ const m = planFotos[f.cod]; if (m && files.length < 10) files.push(new File([m.blob], `${a.id} ${f.cod}.jpg`, {type: m.blob.type || 'image/jpeg'})); }
+  try {
+    if (files.length && navigator.canShare && navigator.canShare({files, text: txt})){ await navigator.share({files, text: txt}); return; }
+    if (navigator.share){ await navigator.share({text: txt}); return; }
+  } catch(e){ if (e.name === 'AbortError') return; }
+  location.href = `https://wa.me/${per.telefono || ''}?text=${encodeURIComponent(txt)}`;
+}
+
+// Buscar plan nuevo cuando la app vuelve a primer plano (con internet)
+let ultimaRevision = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && P && navigator.onLine && Date.now() - ultimaRevision > 60000){ ultimaRevision = Date.now(); refrescarPlanos(); }
+});
 
 // ---------- Arranque ----------
 $('#btnMenu').innerHTML = ic('mas'); $('#btnAtras').innerHTML = ic('atras'); $('#btnChatMenu').innerHTML = ic('mas');
