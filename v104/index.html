@@ -285,6 +285,7 @@ details[open]>summary .flecha{transform:rotate(90deg)}
 .accPer{display:flex;gap:8px;padding:4px 14px 12px}
 .btnAcc{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 6px;border-radius:22px;background:var(--chip);border:1px solid var(--line);font-weight:600;font-size:14px}
 .btnAcc.verde{background:#25d366;border-color:#25d366;color:#0b141a}
+#btnPdfGeneral{background:var(--accent);border-color:var(--accent);color:var(--onAccent)}
 .btnAcc svg{width:18px;height:18px}
 
 /* Hoja inferior, visor, toast */
@@ -1482,9 +1483,10 @@ async function pintarPlan(conservar){
   const det = (k, abrir, resumen, cuerpo, extraCls = '') => `<details class="blq${extraCls}" data-k="${k}"${(abiertos ? abiertos.has(k) : abrir) ? ' open' : ''}>${resumen}${cuerpo}</details>`;
   const sum = (t, s, extra = '') => `<summary><div class="st"><b>${t}</b><small>${s}</small></div>${extra}<span class="flecha">${ic('chev')}</span></summary>`;
   let h = `<div class="planCab"><h2>${esc(pl.titulo)}</h2>
-    <div class="sub">${fdia(pl.dias[0])} → ${fdia(pl.dias[pl.dias.length - 1])} · ${n} actividades · ${pl.personas.length} personas</div>
+    <div class="sub">${fdia(pl.dias[0])} → ${fdia(pl.dias[pl.dias.length - 1])} · ${n} acciones · ${pl.personas.length} personas</div>
     <div class="prog"><i style="width:${n ? hechas/n*100 : 0}%"></i></div>
-    <div class="sub">${hechas} de ${n} hechas · emitido ${fdia(pl.emitido)}</div></div>`;
+    <div class="sub">${hechas} de ${n} hechas · emitido ${fdia(pl.emitido)}</div>
+    <button class="btnAcc verde" id="btnPdfGeneral" style="margin-top:12px;width:100%">${ic('bajar')} PDF general</button></div>`;
   if (pl.preguntas.length || pl.avisos.length)
     h += det('preg', false, sum(`Preguntas y avisos (${pl.preguntas.length + pl.avisos.length})`, 'Revísalos antes de repartir las listas', '<span class="pd alta"></span>'),
       `<div class="pbody">${pl.preguntas.map(q => `<p><b>${esc(q.para)}:</b> ${esc(q.texto)}</p>`).join('')}${pl.avisos.map(x => `<p class="aviso">${esc(x)}</p>`).join('')}${pl.resumen ? `<p class="res">${esc(pl.resumen)}</p>` : ''}</div>`);
@@ -1496,7 +1498,7 @@ async function pintarPlan(conservar){
       const pers = [...new Set(del.map(a => a.responsable))];
       const cuerpo = pers.map(pid => { const mias = del.filter(a => a.responsable === pid);
         return det(`d${i}:${pid}`, false, sum(esc(nomPer(pid)), mias.map(a => esc(a.titulo)).join(' · '), puntos(mias)), mias.map(a => actHTML(a, false, actsAb)).join(''), ' sub'); }).join('');
-      h += det(`d${i}`, i === abrir, sum(fdia(d).toUpperCase() + (d === hoy ? ' <span class="hoyChip">HOY</span>' : ''), `${del.length} actividades · ${pers.length} personas · ${hh} hechas`, puntos(del)), cuerpo);
+      h += det(`d${i}`, i === abrir, sum(fdia(d).toUpperCase() + (d === hoy ? ' <span class="hoyChip">HOY</span>' : ''), `${del.length} acciones · ${pers.length} personas · ${hh} hechas`, puntos(del)), cuerpo);
     });
   } else if (planVista === 'persona'){
     for (const per of pl.personas){
@@ -1506,17 +1508,18 @@ async function pintarPlan(conservar){
         `<div class="accPer"><button class="btnAcc" data-copiar="${esc(per.id)}">${ic('copiar')} Copiar texto</button><button class="btnAcc verde" data-pdf="${esc(per.id)}">${ic('subir')} Enviar PDF</button></div>` + mias.map(a => actHTML(a, false, actsAb)).join(''));
     }
     const sin = acts.filter(a => !a.responsable);
-    if (sin.length) h += det('p:-', false, sum('Por asignar', `${sin.length} actividades sin responsable`, puntos(sin)), sin.map(a => actHTML(a, false, actsAb)).join(''));
+    if (sin.length) h += det('p:-', false, sum('Por asignar', `${sin.length} acciones sin responsable`, puntos(sin)), sin.map(a => actHTML(a, false, actsAb)).join(''));
   } else {
     for (const nv of [...P.niveles.map(x => x.id), 'gen']){
       const ars = Object.values(AREAS).filter(a => a.nivel === nv).map(a => [a, acts.filter(x => x.area === a.id)]).filter(([, l]) => l.length);
       if (!ars.length) continue;
       h += `<div class="seccion">${esc(NIVELES[nv])}</div>`;
-      for (const [ar, l] of ars) h += det(`a:${ar.id}`, false, sum(esc(ar.nombre), `${l.length} actividades · ${l.filter(a => HECHOS[a.id]).length} hechas`, puntos(l)), l.map(a => actHTML(a, true, actsAb)).join(''));
+      for (const [ar, l] of ars) h += det(`a:${ar.id}`, false, sum(esc(ar.nombre), `${l.length} acciones · ${l.filter(a => HECHOS[a.id]).length} hechas`, puntos(l)), l.map(a => actHTML(a, true, actsAb)).join(''));
     }
   }
   L.innerHTML = h;
   L.querySelectorAll('.segm button').forEach(b => b.onclick = () => { planVista = b.dataset.v; pintarPlan(); });
+  $('#btnPdfGeneral').onclick = enviarPDFgeneral;
   if (conservar) sc.scrollTop = y;
 }
 
@@ -1572,91 +1575,202 @@ async function fotoParaPdf(blob, lado = 1000){
   c.getContext('2d').drawImage(bm, 0, 0, c.width, c.height); if (bm.close) bm.close();
   return {url: c.toDataURL('image/jpeg', .75), w: c.width, h: c.height};
 }
-async function pdfPersona(pid){
-  const JsPDF = await cargarJsPDF();
-  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
-  const doc = new JsPDF({unit: 'mm', format: 'a4'}), W = 210, H = 297, M = 14, AN = W - 2*M, VERDE = [0, 121, 107];
-  const PRI = {alta: [217, 48, 37], media: [227, 116, 0], baja: [110, 119, 129]};
-  let y = M;
-  const salto = alto => { if (y + alto > H - M - 6){ doc.addPage(); y = M; } };
+// Motor común de los PDF del teléfono (A4, márgenes de 14 mm, letras estándar)
+function motorPdf(JsPDF){
+  const doc = new JsPDF({unit: 'mm', format: 'a4'}), W = 210, H = 297, M = 14, AN = W - 2*M, z = {y: M};
+  const salto = alto => { if (z.y + alto > H - M - 6){ doc.addPage(); z.y = M; } };
   const texto = (t, x, tam, estilo = 'normal', color = [31, 35, 40], ancho = AN) => {
     doc.setFont('helvetica', estilo); doc.setFontSize(tam); doc.setTextColor(...color);
     const l = doc.splitTextToSize(limpio(t), ancho), alto = l.length * tam * .42;
-    salto(alto); doc.text(l, x, y + tam * .35); y += alto; return alto;
+    salto(alto); doc.text(l, x, z.y + tam * .35); z.y += alto; return alto;
   };
-  // cabecera
-  texto(`OBRA ${P.titulo} · ACCIONES`, M, 9, 'bold', VERDE); y += 1;
-  texto(per.nombre, M, 20, 'bold'); y += 1;
-  texto(`${per.oficio} · ${pend.length} ${pend.length !== 1 ? 'acciones pendientes' : 'acción pendiente'}`, M, 10, 'normal', [87, 96, 106]);
-  doc.setDrawColor(...VERDE); doc.setLineWidth(.8); doc.line(M, y + 2, W - M, y + 2); y += 6;
+  const titulo = t => { salto(14); z.y += 4; texto(t.toUpperCase(), M, 10.5, 'bold', VERDE_PDF); doc.setDrawColor(208, 215, 222); doc.setLineWidth(.3); doc.line(M, z.y + 1, W - M, z.y + 1); z.y += 4; };
+  const pie = etiqueta => { const n = doc.getNumberOfPages(); for (let i = 1; i <= n; i++){ doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(140, 149, 159); doc.text(limpio(`${etiqueta} · página ${i} de ${n} · ${new Date().toLocaleDateString('es-VE')}`), W/2, H - 7, {align: 'center'}); } };
+  return {doc, W, H, M, AN, z, salto, texto, titulo, pie};
+}
+const VERDE_PDF = [192, 104, 24];   // naranja MiLibroDeObra
+const PRI_PDF = {alta: [214, 69, 69], media: [192, 104, 24], baja: [110, 119, 129]};
+// Una acción con su casilla, datos y fotos. fechas/responsable solo en lo que ve Leonel.
+async function dibujarAccion(m, a, {conFechas = false, conResp = false} = {}){
+  const {doc, M, W, AN, z, salto, texto} = m, hecha = HECHOS[a.id];
+  salto(24);
+  doc.setDrawColor(31, 35, 40); doc.setLineWidth(.5); doc.roundedRect(M, z.y + .5, 5, 5, .8, .8, hecha ? 'FD' : 'S');
+  if (hecha){ doc.setFillColor(47, 158, 99); doc.roundedRect(M, z.y + .5, 5, 5, .8, .8, 'F'); doc.setDrawColor(255); doc.setLineWidth(.7); doc.line(M + 1.1, z.y + 3.2, M + 2.2, z.y + 4.3); doc.line(M + 2.2, z.y + 4.3, M + 4, z.y + 1.7); }
+  const y0 = z.y; texto(a.titulo, M + 8, 12.5, 'bold', hecha ? [120, 128, 138] : [31, 35, 40], AN - 8);
+  const meta = [a.id, AREAS[a.area] ? NIVELES[AREAS[a.area].nivel] + ' · ' + AREAS[a.area].nombre : '', conResp ? (nomPer(a.responsable) || 'Por asignar') : '', conFechas ? a.rango : '', 'prioridad ' + a.prioridad, hecha ? 'HECHA ' + new Date(hecha).toLocaleDateString('es-VE') : ''].filter(Boolean).join(' · ');
+  z.y += .5; texto(meta, M + 8, 9, 'normal', hecha ? [47, 158, 99] : (PRI_PDF[a.prioridad] || [87, 96, 106]), AN - 8);
+  if (z.y - y0 < 6) z.y = y0 + 6;
+  z.y += 1.5;
+  const bloque = (lbl, t) => { if (!t) return; z.y += 1; texto(lbl.toUpperCase(), M + 8, 7.5, 'bold', [87, 96, 106], AN - 8); z.y += .3; texto(t, M + 8, 10, 'normal', [31, 35, 40], AN - 8); };
+  if (a.detalle) texto(a.detalle, M + 8, 10, 'normal', [31, 35, 40], AN - 8);
+  bloque('Con', (a.ayudantes || []).map(nomPer).join(', '));
+  bloque('Empieza después de', (a.depende_de || []).map(d => { const o = P.plan.actividades.find(x => x.id === d); return d + (o ? ' ' + o.titulo : ''); }).join(' · '));
+  bloque('Cómo se recibe', a.criterio);
+  bloque('Materiales', (a.materiales || []).join(' · '));
+  const fotos = (a.fotos || []).map(f => ({f, m: planFotos[f.cod]})).filter(x => x.m).slice(0, 4);
+  if (fotos.length){
+    z.y += 3; const col = fotos.length === 1 ? 1 : 2, cw = (AN - 8 - (col - 1)*4) / col;
+    for (let i = 0; i < fotos.length; i += col){
+      const fila = [];
+      for (const x of fotos.slice(i, i + col)){ try { fila.push({...(await fotoParaPdf(x.m.blob)), nota: x.f.nota}); } catch(e){} }
+      if (!fila.length) continue;
+      const alto = Math.min(70, Math.max(...fila.map(p => cw * p.h / p.w)));
+      salto(alto + 6);
+      fila.forEach((p, j) => {
+        const w = Math.min(cw, alto * p.w / p.h), h = w * p.h / p.w, x = M + 8 + j*(cw + 4) + (cw - w)/2;
+        doc.addImage(p.url, 'JPEG', x, z.y, w, h);
+        if (p.nota){ doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(87, 96, 106); doc.text(doc.splitTextToSize(limpio(p.nota), cw)[0], M + 8 + j*(cw + 4), z.y + alto + 3.5); }
+      });
+      z.y += alto + 6;
+    }
+  }
+  z.y += 3; doc.setDrawColor(208, 215, 222); doc.setLineWidth(.3); doc.line(M, z.y, W - M, z.y); z.y += 5;
+}
+function cabeceraPdf(m, linea1, titulo, sub){
+  const {doc, M, W, AN, z, texto} = m;
+  texto(linea1, M, 9, 'bold', VERDE_PDF); z.y += 1;
+  texto(titulo, M, 20, 'bold'); z.y += 1;
+  texto(sub, M, 10, 'normal', [87, 96, 106]);
+  doc.setDrawColor(...VERDE_PDF); doc.setLineWidth(.8); doc.line(M, z.y + 2, W - M, z.y + 2); z.y += 6;
+}
+
+// Lista de una persona: solo pendientes, en orden y SIN fechas (decisión de Leonel)
+async function pdfPersona(pid){
+  const m = motorPdf(await cargarJsPDF()), {doc, M, W, AN, z, salto} = m;
+  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
+  cabeceraPdf(m, `OBRA ${P.titulo} · ACCIONES`, per.nombre, `${per.oficio} · ${pend.length} ${pend.length !== 1 ? 'acciones pendientes' : 'acción pendiente'}`);
   const instr = 'Haz las acciones en este orden. Marca la casilla al terminar cada una y mándale una foto al ingeniero. Si algo no se puede hacer como dice aquí, avisa antes de empezar.';
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); const li = doc.splitTextToSize(instr, AN - 8);
-  doc.setFillColor(238, 247, 245); doc.roundedRect(M, y, AN, li.length * 4 + 5, 2, 2, 'F');
-  doc.setTextColor(31, 35, 40); doc.text(li, M + 4, y + 5.5); y += li.length * 4 + 9;
-  // actividades
-  for (const a of pend){
-    salto(24);
-    doc.setDrawColor(31, 35, 40); doc.setLineWidth(.5); doc.roundedRect(M, y + .5, 5, 5, .8, .8);
-    const y0 = y; texto(a.titulo, M + 8, 12.5, 'bold', [31, 35, 40], AN - 8);
-    const meta = `${a.id} · ${AREAS[a.area] ? NIVELES[AREAS[a.area].nivel] + ' · ' + AREAS[a.area].nombre : ''} · prioridad ${a.prioridad}`;
-    y += .5; texto(meta, M + 8, 9, 'normal', PRI[a.prioridad] || [87, 96, 106], AN - 8);
-    if (y - y0 < 6) y = y0 + 6;
-    y += 1.5;
-    const bloque = (lbl, t) => { if (!t) return; y += 1; texto(lbl.toUpperCase(), M + 8, 7.5, 'bold', [87, 96, 106], AN - 8); y += .3; texto(t, M + 8, 10, 'normal', [31, 35, 40], AN - 8); };
-    if (a.detalle){ texto(a.detalle, M + 8, 10, 'normal', [31, 35, 40], AN - 8); }
-    bloque('Con', (a.ayudantes || []).map(nomPer).join(', '));
-    bloque('Empieza después de', (a.depende_de || []).map(d => { const o = P.plan.actividades.find(x => x.id === d); return d + (o ? ' ' + o.titulo : ''); }).join(' · '));
-    bloque('Cómo se recibe', a.criterio);
-    bloque('Materiales', (a.materiales || []).join(' · '));
-    const fotos = (a.fotos || []).map(f => ({f, m: planFotos[f.cod]})).filter(x => x.m).slice(0, 4);
-    if (fotos.length){
-      y += 3; const col = fotos.length === 1 ? 1 : 2, cw = (AN - 8 - (col - 1)*4) / col;
-      for (let i = 0; i < fotos.length; i += col){
-        const fila = [];
-        for (const x of fotos.slice(i, i + col)) { try { fila.push({...(await fotoParaPdf(x.m.blob)), nota: x.f.nota}); } catch(e){} }
-        if (!fila.length) continue;
-        const alto = Math.min(70, Math.max(...fila.map(p => cw * p.h / p.w)));
-        salto(alto + 6);
-        fila.forEach((p, j) => {
-          const w = Math.min(cw, alto * p.w / p.h), h = w * p.h / p.w, x = M + 8 + j*(cw + 4) + (cw - w)/2;
-          doc.addImage(p.url, 'JPEG', x, y, w, h);
-          if (p.nota){ doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(87, 96, 106); doc.text(doc.splitTextToSize(limpio(p.nota), cw)[0], M + 8 + j*(cw + 4), y + alto + 3.5); }
-        });
-        y += alto + 6;
-      }
-    }
-    y += 3; doc.setDrawColor(208, 215, 222); doc.setLineWidth(.3); doc.line(M, y, W - M, y); y += 5;
-  }
-  // firmas
-  salto(24); y += 12; doc.setDrawColor(31, 35, 40); doc.setLineWidth(.3);
-  doc.line(M, y, M + 80, y); doc.line(W - M - 80, y, W - M, y);
+  doc.setFillColor(251, 240, 226); doc.roundedRect(M, z.y, AN, li.length * 4 + 5, 2, 2, 'F');
+  doc.setTextColor(31, 35, 40); doc.text(li, M + 4, z.y + 5.5); z.y += li.length * 4 + 9;
+  for (const a of pend) await dibujarAccion(m, a);
+  salto(24); z.y += 12; doc.setDrawColor(31, 35, 40); doc.setLineWidth(.3);
+  doc.line(M, z.y, M + 80, z.y); doc.line(W - M - 80, z.y, W - M, z.y);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(87, 96, 106);
-  doc.text('Entregado por (ingeniero de obra) · fecha', M, y + 4); doc.text(limpio(`Recibido por ${per.nombre} · fecha`), W - M - 80, y + 4);
-  const n = doc.getNumberOfPages();
-  for (let i = 1; i <= n; i++){ doc.setPage(i); doc.setFontSize(8); doc.setTextColor(140, 149, 159); doc.text(limpio(`${P.titulo} · ${per.nombre} · página ${i} de ${n} · ${new Date().toLocaleDateString('es-VE')}`), W/2, H - 7, {align: 'center'}); }
+  doc.text('Entregado por (ingeniero de obra) · fecha', M, z.y + 4); doc.text(limpio(`Recibido por ${per.nombre} · fecha`), W - M - 80, z.y + 4);
+  m.pie(`${P.titulo} · ${per.nombre}`);
   return doc.output('blob');
 }
-async function enviarPDF(pid){
-  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
-  if (!pend.length){ toast(`${per.nombre} ya tiene todo hecho.`); return; }
-  toast('Armando el PDF…', 0);
-  let blob;
-  try { blob = await pdfPersona(pid); }
-  catch(e){ toast('No pude armar el PDF: ' + e.message, 5000); return; }
-  $('#toast').hidden = true;
-  const nombre = `${P.titulo} - ${per.nombre}.pdf`.replace(/[\\/:*?"<>|]/g, '-');
-  const file = new File([blob], nombre, {type: 'application/pdf'});
+
+// Plan general para Leonel: todo, con fechas, cronograma y lo ya hecho
+async function pdfGeneral(){
+  const m = motorPdf(await cargarJsPDF()), {doc, M, W, AN, z, salto, texto, titulo} = m, pl = P.plan, acts = pl.actividades;
+  const hechas = acts.filter(a => HECHOS[a.id]).length, alta = acts.filter(a => a.prioridad === 'alta' && !HECHOS[a.id]).length;
+  cabeceraPdf(m, `OBRA ${P.titulo}`, pl.titulo || 'Acciones', `Del ${fdia(pl.dias[0])} al ${fdia(pl.dias[pl.dias.length - 1])} · ${pl.dias.length} días hábiles · emitido ${fdia(pl.emitido)} · actualizado ${new Date().toLocaleDateString('es-VE')}`);
+  // cifras
+  const cifras = [[acts.length, 'acciones'], [hechas, 'hechas'], [acts.length - hechas, 'pendientes'], [alta, 'alta pendientes'], [pl.personas.length, 'personas']];
+  const cw = (AN - 4*3) / 5;
+  cifras.forEach(([n, t], i) => { const x = M + i*(cw + 3); doc.setDrawColor(208, 215, 222); doc.setLineWidth(.3); doc.roundedRect(x, z.y, cw, 14, 2, 2);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(31, 35, 40); doc.text(String(n), x + 3, z.y + 7);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(87, 96, 106); doc.text(t, x + 3, z.y + 11.5); });
+  z.y += 18;
+  doc.setFillColor(236, 230, 219); doc.roundedRect(M, z.y, AN, 2.5, 1.2, 1.2, 'F');
+  if (hechas){ doc.setFillColor(...VERDE_PDF); doc.roundedRect(M, z.y, AN * hechas / acts.length, 2.5, 1.2, 1.2, 'F'); }
+  z.y += 6;
+  if (pl.resumen) texto(pl.resumen, M, 10, 'normal');
+  if (pl.preguntas.length || pl.avisos.length){
+    titulo('Preguntas y avisos');
+    for (const q of pl.preguntas){ texto(`${q.para}: ${q.texto}`, M + 2, 9.5, 'normal', [31, 35, 40], AN - 2); z.y += 1.2; }
+    for (const x of pl.avisos){ texto(x, M + 2, 9.5, 'normal', [154, 83, 18], AN - 2); z.y += 1.2; }
+  }
+  // quién hace qué
+  titulo('Quién hace qué');
+  const colX = [M, M + 58, M + 112, M + 128, M + 144];
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(87, 96, 106);
+  ['PERSONA', 'OFICIO', 'ACC.', 'HECHAS', 'FECHAS'].forEach((t, i) => doc.text(t, colX[i], z.y + 3)); z.y += 5;
+  for (const per of pl.personas){
+    const mias = actsDe(per.id); if (!mias.length) continue;
+    salto(6); doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(31, 35, 40);
+    doc.text(limpio(per.nombre), colX[0], z.y + 3.5);
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(87, 96, 106); doc.text(doc.splitTextToSize(limpio(per.oficio), 52)[0], colX[1], z.y + 3.5);
+    doc.setTextColor(31, 35, 40); doc.text(String(mias.length), colX[2], z.y + 3.5); doc.text(String(mias.filter(a => HECHOS[a.id]).length), colX[3], z.y + 3.5);
+    doc.text(limpio(`${fdia(pl.dias[mias[0].d0])} - ${fdia(pl.dias[Math.max(...mias.map(a => a.d1))])}`), colX[4], z.y + 3.5);
+    z.y += 5.5; doc.setDrawColor(230, 233, 237); doc.setLineWidth(.2); doc.line(M, z.y, W - M, z.y); z.y += .5;
+  }
+  // cronograma
+  const filas = pl.personas.filter(p => actsDe(p.id).length), POR = 8;
+  for (let b = 0; b < pl.dias.length; b += POR){
+    const dd = pl.dias.slice(b, b + POR).map((d, k) => [b + k, d]);
+    titulo('Cronograma' + (pl.dias.length > POR ? ` (días ${b + 1}-${b + dd.length})` : ''));
+    const pc = 36, dc = (AN - pc) / dd.length;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(87, 96, 106);
+    dd.forEach(([, d], k) => doc.text(limpio(fdia(d)), M + pc + k*dc + dc/2, z.y + 3, {align: 'center'}));
+    z.y += 5;
+    for (const per of filas){
+      const celdas = dd.map(([i]) => acts.filter(a => (a.responsable === per.id || (a.ayudantes || []).includes(per.id)) && a.d0 <= i && a.d1 >= i));
+      const alto = Math.max(6, Math.max(...celdas.map(c => c.length)) * 4 + 2);
+      salto(alto);
+      doc.setDrawColor(230, 233, 237); doc.setLineWidth(.2); doc.rect(M, z.y, AN, alto);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(31, 35, 40);
+      doc.text(doc.splitTextToSize(limpio(per.nombre), pc - 2)[0], M + 1.5, z.y + 4);
+      celdas.forEach((c, k) => {
+        const x = M + pc + k*dc; doc.line(x, z.y, x, z.y + alto);
+        c.forEach((a, j) => { const col = HECHOS[a.id] ? [47, 158, 99] : (PRI_PDF[a.prioridad] || [110, 119, 129]);
+          doc.setFillColor(...col); doc.roundedRect(x + 1, z.y + 1 + j*4, dc - 2, 3.4, .8, .8, 'F');
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(255); doc.text(a.id, x + dc/2, z.y + 3.4 + j*4, {align: 'center'}); });
+      });
+      z.y += alto;
+    }
+    z.y += 2; doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(87, 96, 106);
+    doc.text('Rojo: prioridad alta · naranja: media · gris: baja · verde: hecha', M, z.y + 3); z.y += 5;
+  }
+  // por área
+  titulo('Acciones por área');
+  for (const nv of [...P.niveles.map(x => x.id), 'gen']){
+    for (const ar of Object.values(AREAS).filter(a => a.nivel === nv)){
+      const l = acts.filter(a => a.area === ar.id); if (!l.length) continue;
+      salto(10); z.y += 1; texto(`${ar.nombre} · ${NIVELES[nv]}`, M, 9.5, 'bold', [31, 35, 40]);
+      for (const a of l){
+        const h = HECHOS[a.id];
+        texto(`${h ? '[x]' : '[  ]'} ${a.id}  ${a.titulo} · ${nomPer(a.responsable) || 'Por asignar'} · ${a.rango}${a.prioridad === 'alta' ? ' · ALTA' : ''}`, M + 3, 9, 'normal', h ? [47, 158, 99] : [31, 35, 40], AN - 3);
+        z.y += .6;
+      }
+    }
+  }
+  // materiales
+  const mats = {};
+  for (const a of acts) for (const x of a.materiales || []){ const k = x.split(' · ')[0].toLowerCase().trim(); (mats[k] = mats[k] || {n: x.split(' · ')[0], c: [], a: []}); if (x.includes(' · ')) mats[k].c.push(x.split(' · ').slice(1).join(' · ')); mats[k].a.push(a.id); }
+  if (Object.keys(mats).length){
+    titulo('Materiales');
+    for (const v of Object.values(mats).sort((x, y) => x.n.localeCompare(y.n))) { texto(`${v.n}: ${v.c.join(' + ') || 'por definir'}  (${v.a.join(', ')})`, M + 2, 9.5, 'normal', [31, 35, 40], AN - 2); z.y += .8; }
+  }
+  // detalle con fotos
+  doc.addPage(); z.y = M; titulo('Detalle de cada acción');
+  for (const a of [...acts].sort((x, y) => x.d0 - y.d0)) await dibujarAccion(m, a, {conFechas: true, conResp: true});
+  m.pie(`${P.titulo} · Acciones · general`);
+  return doc.output('blob');
+}
+
+// Hoja para mandar, ver o guardar un PDF armado en el teléfono
+function mostrarPdf(blob, nombre, titulo, sub, para){
+  const file = new File([blob], nombre.replace(/[\\/:*?"<>|]/g, '-'), {type: 'application/pdf'});
   const puede = navigator.canShare && navigator.canShare({files: [file]});
   // Armar el PDF tarda: el teléfono pide un toque nuevo para abrir el menú de compartir
-  hoja(`<h3>PDF de ${esc(per.nombre)}</h3><p>${pend.length} actividad${pend.length !== 1 ? 'es' : ''} pendiente${pend.length !== 1 ? 's' : ''} con sus fotos · ${(blob.size/1048576).toFixed(1)} MB</p>
-    ${puede ? `<button class="op" data-a="comp">${ic('subir')}<div>Enviar<small>Elige WhatsApp y el chat de ${esc(per.nombre.split(' ')[0])}</small></div></button>` : ''}
+  hoja(`<h3>${esc(titulo)}</h3><p>${esc(sub)} · ${(blob.size/1048576).toFixed(1)} MB</p>
+    ${puede ? `<button class="op" data-a="comp">${ic('subir')}<div>Enviar<small>${esc(para)}</small></div></button>` : ''}
     <button class="op" data-a="ver">${ic('imagen')}<div>Ver el PDF</div></button>
     <button class="op" data-a="desc">${ic('bajar')}<div>Guardar en Descargas</div></button>`, h => {
     const c = h.querySelector('[data-a=comp]');
     if (c) c.onclick = async () => { try { await navigator.share({files: [file]}); cerrarHoja(); } catch(e){ if (e.name !== 'AbortError') toast('No se pudo compartir: ' + e.message, 4000); } };
     h.querySelector('[data-a=ver]').onclick = () => { const u = URL.createObjectURL(file); window.open(u, '_blank'); setTimeout(() => URL.revokeObjectURL(u), 120000); };
-    h.querySelector('[data-a=desc]').onclick = () => { const u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); cerrarHoja(); toast('Guardado en Descargas.'); };
+    h.querySelector('[data-a=desc]').onclick = () => { const u = URL.createObjectURL(file), a = document.createElement('a'); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 60000); cerrarHoja(); toast('Guardado en Descargas.'); };
   });
+}
+async function enviarPDF(pid){
+  const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
+  if (!pend.length){ toast(`${per.nombre} ya tiene todo hecho.`); return; }
+  toast('Armando el PDF…', 0);
+  let blob; try { blob = await pdfPersona(pid); } catch(e){ toast('No pude armar el PDF: ' + e.message, 5000); return; }
+  $('#toast').hidden = true;
+  mostrarPdf(blob, `${P.titulo} - ${per.nombre}.pdf`, `PDF de ${per.nombre}`, `${pend.length} ${pend.length !== 1 ? 'acciones pendientes' : 'acción pendiente'} con sus fotos`, `Elige WhatsApp y el chat de ${per.nombre.split(' ')[0]}`);
+}
+async function enviarPDFgeneral(){
+  toast('Armando el PDF general… (con todas las fotos puede tardar)', 0);
+  await indexarFotos();
+  let blob; try { blob = await pdfGeneral(); } catch(e){ toast('No pude armar el PDF: ' + e.message, 5000); return; }
+  $('#toast').hidden = true;
+  const n = P.plan.actividades.length, h = P.plan.actividades.filter(a => HECHOS[a.id]).length;
+  mostrarPdf(blob, `${P.titulo} - Acciones general ${new Date().toLocaleDateString('en-CA')}.pdf`, 'PDF general', `${n} acciones · ${h} hechas · con cronograma y fotos`, 'WhatsApp, correo, imprimir…');
 }
 
 // Buscar plan nuevo cuando la app vuelve a primer plano (con internet)
