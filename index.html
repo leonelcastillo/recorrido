@@ -516,7 +516,7 @@ async function refrescarPlanos(){
       await kvSet('payload2', nuevo);
       const mismos = JSON.stringify([nuevo.niveles, nuevo.generales]) === JSON.stringify([P.niveles, P.generales]);
       const planNuevo = JSON.stringify(nuevo.plan || null) !== JSON.stringify(P.plan || null);
-      if (mismos){ P = nuevo; if (!$('#inicio').hidden) pintarInicio(); if (planNuevo && P.plan) toast('Llegó el plan de culminación: pestaña PLAN.', 5000); }
+      if (mismos){ P = nuevo; if (!$('#inicio').hidden) pintarInicio(); if (planNuevo && P.plan) toast('Llegaron las acciones: pestaña ACCIONES.', 5000); }
       else toast('Planos actualizados. Cierra y abre la app para verlos.', 5000);
     }
   } catch(e){}
@@ -524,7 +524,7 @@ async function refrescarPlanos(){
 
 // ---------- Inicio ----------
 function pintarTabs(){
-  const ts = [...P.niveles.map(n => [n.id, n.corto || n.nombre]), ['gen','Generales'], ...(P.plan ? [['plan','Plan']] : [])];
+  const ts = [...P.niveles.map(n => [n.id, n.corto || n.nombre]), ['gen','Generales'], ...(P.plan ? [['plan','Acciones']] : [])];
   if (tab === 'plan' && !P.plan) tab = P.niveles[0].id;
   $('#tabs').innerHTML = ts.map(([k,n]) => `<button data-k="${k}" class="${k===tab?'on':''}">${esc(n)}</button>`).join('');
   $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { tab = b.dataset.k; pintarInicio(); $('#scrollInicio').scrollTop = 0; });
@@ -1466,8 +1466,8 @@ $('#lista').addEventListener('click', async e => {
 function textoLista(pid){
   const per = P.plan.personas.find(x => x.id === pid), pend = actsDe(pid).filter(a => !HECHOS[a.id]);
   if (!pend.length) return null;
-  return [`Hola ${per.nombre.split(' ')[0]}, te paso tu lista del plan de culminación de la obra ${P.titulo}.`,
-    `Son ${pend.length} actividad${pend.length !== 1 ? 'es' : ''}:`, '',
+  return [`Hola ${per.nombre.split(' ')[0]}, te paso tus acciones pendientes de la obra ${P.titulo}.`,
+    `Son ${pend.length} ${pend.length !== 1 ? 'acciones' : 'acción'}:`, '',
     ...pend.map((a, i) => `${i + 1}. ${AREAS[a.area] ? AREAS[a.area].nombre + ': ' : ''}${a.titulo}${a.prioridad === 'alta' ? ' ⚠ prioridad' : ''}`),   // sin fechas: solo la lista
     '', 'En el PDF van las fotos y cómo se recibe cada punto. Cuando termines cada una, mándame una foto. Cualquier duda me escribes.'].join('\n');
 }
@@ -1513,11 +1513,11 @@ async function pdfPersona(pid){
     salto(alto); doc.text(l, x, y + tam * .35); y += alto; return alto;
   };
   // cabecera
-  texto(`OBRA ${P.titulo} · PLAN DE CULMINACIÓN`, M, 9, 'bold', VERDE); y += 1;
+  texto(`OBRA ${P.titulo} · ACCIONES`, M, 9, 'bold', VERDE); y += 1;
   texto(per.nombre, M, 20, 'bold'); y += 1;
-  texto(`${per.oficio} · ${pend.length} actividad${pend.length !== 1 ? 'es' : ''} pendiente${pend.length !== 1 ? 's' : ''}`, M, 10, 'normal', [87, 96, 106]);
+  texto(`${per.oficio} · ${pend.length} ${pend.length !== 1 ? 'acciones pendientes' : 'acción pendiente'}`, M, 10, 'normal', [87, 96, 106]);
   doc.setDrawColor(...VERDE); doc.setLineWidth(.8); doc.line(M, y + 2, W - M, y + 2); y += 6;
-  const instr = 'Haz las actividades en este orden. Marca la casilla al terminar cada una y mándale una foto al ingeniero. Si algo no se puede hacer como dice aquí, avisa antes de empezar.';
+  const instr = 'Haz las acciones en este orden. Marca la casilla al terminar cada una y mándale una foto al ingeniero. Si algo no se puede hacer como dice aquí, avisa antes de empezar.';
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); const li = doc.splitTextToSize(instr, AN - 8);
   doc.setFillColor(238, 247, 245); doc.roundedRect(M, y, AN, li.length * 4 + 5, 2, 2, 'F');
   doc.setTextColor(31, 35, 40); doc.text(li, M + 4, y + 5.5); y += li.length * 4 + 9;
